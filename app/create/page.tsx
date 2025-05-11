@@ -21,7 +21,6 @@ import { ConfirmationDialog } from "@/components/confirmation-dialog";
 import { ProgressSteps, type Step } from "@/components/progress-steps";
 import { TokenInfoCard } from "@/components/token-info-card";
 import { useToastNotification } from "@/components/toast-notification";
-import { NetworkSelector } from "@/components/network-selector";
 import {
   createToken,
   calculateDeploymentCost,
@@ -328,9 +327,7 @@ export default function CreatePage() {
           </p>
         </div>
 
-        <div className="flex justify-end mb-4">
-          <NetworkSelector />
-        </div>
+
 
         <Tabs defaultValue="standard" className="w-full">
           <TabsList className="grid w-full grid-cols-3 mb-8">

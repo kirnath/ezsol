@@ -61,7 +61,6 @@ const Navbar = () => {
         </nav>
 
         <div className="hidden md:flex items-center gap-4">
-          <NetworkSelector />
           <WalletButton />
         </div>
 
@@ -89,7 +88,6 @@ const Navbar = () => {
               </Link>
             ))}
             <div className="flex items-center justify-between mt-2">
-              <NetworkSelector />
               <WalletButton className="w-full ml-2" />
             </div>
           </div>
