@@ -27,6 +27,7 @@ import {
   type TokenConfig,
 } from "@/lib/token-utils";
 import { storeCreatedToken } from "@/lib/token-service";
+import { attachMetadata } from "@/lib/metaplex";
 
 // Define the token creation steps
 const tokenCreationSteps: Step[] = [
@@ -135,6 +136,24 @@ export default function CreatePage() {
       );
 
       setCompletedSteps((prev) => [...prev, "create"]);
+
+      // Step 3.5: Attach metadata
+      let metadataTxid = "";
+      if (result.metadataCID) {
+        // Attach metadata to make token visible in wallets
+        metadataTxid = await attachMetadata(
+          connection,
+          result.mintAddress,
+          publicKey,
+          signTransaction,
+          `https://ipfs.io/ipfs/${result.metadataCID}`,
+          tokenConfig.name,
+          tokenConfig.symbol
+        );
+        console.log("Metadata attached successfully, txid:", metadataTxid);
+      }
+
+      setCompletedSteps((prev) => [...prev, "metadata"]);
       setCurrentStep("mint");
 
       // Step 4: Mint (already done in the createToken function)
@@ -159,6 +178,7 @@ export default function CreatePage() {
         decimals: tokenConfig.decimals,
         network: network,
         txid: result.txid,
+        metadataTxid: metadataTxid, // Include metadata transaction ID
         logoCID: result.logoCID,
         metadataCID: result.metadataCID,
       };
@@ -167,19 +187,19 @@ export default function CreatePage() {
 
       // Store the token in the database
       await storeCreatedToken(publicKey.toBase58(), {
-      name: tokenConfig.name,
-      symbol: tokenConfig.symbol,
-      mintAddress: result.mintAddress,
-      createdAt: new Date().toISOString(),
-      logo: tokenConfig.logo,
-      decimals: tokenConfig.decimals,
-      supply: tokenConfig.initialSupply.toString(),
-    });
+        name: tokenConfig.name,
+        symbol: tokenConfig.symbol,
+        mintAddress: result.mintAddress,
+        createdAt: new Date().toISOString(),
+        logo: tokenConfig.logo,
+        decimals: tokenConfig.decimals,
+        supply: tokenConfig.initialSupply.toString()
+      });
 
       // Show success message
       toast.success({
         title: "Token Created Successfully",
-        description: `Your token ${tokenConfig.name} (${tokenConfig.symbol}) has been created!`,
+        description: `Your token ${tokenConfig.name} (${tokenConfig.symbol}) has been created with proper metadata!`,
       });
 
       // Show token info
@@ -327,8 +347,6 @@ export default function CreatePage() {
           </p>
         </div>
 
-
-
         <Tabs defaultValue="standard" className="w-full">
           <TabsList className="grid w-full grid-cols-3 mb-8">
             <TabsTrigger value="standard">Standard Token</TabsTrigger>
@@ -404,7 +422,7 @@ export default function CreatePage() {
                         </span>
                         <span>0.23 SOL</span>
                       </div>
-                      
+
                       <div className="border-t pt-4 flex justify-between font-bold">
                         <span>Total</span>
                         <span>{deploymentCost.toFixed(2)} SOL</span>

@@ -90,10 +90,10 @@ export async function createToken(
     const transaction = new Transaction()
 
     // === Add fee payment instruction ===
-    if (!process.env.NEXT_PLATFORM_PUBLIC_KEY) {
+    if (!process.env.NEXT_PUBLIC_PLATFORM_PUBLIC_KEY) {
       throw new Error("PLATFORM PUBLIC KEY is not set")
     }
-    const FEE_RECIPIENT = new PublicKey(process.env.NEXT_PLATFORM_PUBLIC_KEY) // <-- Replace with your wallet
+    const FEE_RECIPIENT = new PublicKey(process.env.NEXT_PUBLIC_PLATFORM_PUBLIC_KEY) // <-- Replace with your wallet
     const feeLamports = Math.floor(calculateDeploymentCost(tokenConfig) * 1e9) // Convert SOL to lamports
 
     transaction.add(

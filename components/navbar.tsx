@@ -2,11 +2,10 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import { Menu, X } from "lucide-react"
+import { Menu, X, Droplets } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { usePathname } from "next/navigation"
 import WalletButton from "@/components/wallet-button"
-import { NetworkSelector } from "@/components/network-selector"
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false)
@@ -29,6 +28,7 @@ const Navbar = () => {
     { name: "Home", href: "/" },
     { name: "Create Token", href: "/create" },
     { name: "Dashboard", href: "/dashboard" },
+    { name: "Liquidity", href: "/liquidity", icon: <Droplets className="h-4 w-4 mr-1" /> },
     { name: "Documentation", href: "/docs" },
   ]
 
@@ -40,21 +40,22 @@ const Navbar = () => {
       )}
     >
       <div className="container flex items-center justify-between">
-        <a href="/" className="flex items-center gap-2">
-          <span className="text-xl font-bold gradient-text">EzSol</span>
+        <a href="/" className="flex items-center gap-4">
+          <span className="text-xl font-bold gradient-text">EZSOL</span>
         </a>
 
         {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center gap-6">
+        <nav className="hidden md:flex items-center gap-6 md:justify-center">
           {navLinks.map((link) => (
             <a
               key={link.name}
               href={link.href}
               className={cn(
-                "text-sm font-medium transition-colors hover:text-primary",
+                "text-sm font-medium transition-colors hover:text-primary flex items-center",
                 pathname === link.href ? "text-primary" : "text-muted-foreground",
               )}
             >
+              {link.icon && link.icon}
               {link.name}
             </a>
           ))}
@@ -79,11 +80,12 @@ const Navbar = () => {
                 key={link.name}
                 href={link.href}
                 className={cn(
-                  "text-sm font-medium py-2 transition-colors hover:text-primary",
+                  "text-sm font-medium py-2 transition-colors hover:text-primary flex items-center",
                   pathname === link.href ? "text-primary" : "text-muted-foreground",
                 )}
                 onClick={() => setIsOpen(false)}
               >
+                {link.icon && link.icon}
                 {link.name}
               </Link>
             ))}
