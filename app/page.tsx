@@ -4,8 +4,10 @@ import { ArrowRight, Zap, Shield, Coins, BarChart } from "lucide-react"
 import FeatureCard from "@/components/feature-card"
 import TokenCard from "@/components/token-card"
 import Testimonial from "@/components/testimonial"
+import GraduatedTokens from "./graduated-tokens"
 
 export default function Home() {
+  
   return (
     <div className="flex flex-col min-h-screen">
       {/* Hero Section */}
@@ -154,50 +156,7 @@ export default function Home() {
       </section>
 
       {/* Popular Tokens Section */}
-      <section className="py-20 relative">
-        <div className="container">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Popular <span className="gradient-text">Tokens</span>
-            </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Check out some of the most successful tokens created with our platform.
-            </p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <TokenCard
-              name="GalaxyToken"
-              symbol="GLXY"
-              price="$0.0325"
-              change="+12.5%"
-              volume="$1.2M"
-              image="/placeholder.svg?height=80&width=80"
-            />
-            <TokenCard
-              name="NeonFinance"
-              symbol="NEON"
-              price="$0.1452"
-              change="+8.3%"
-              volume="$3.7M"
-              image="/placeholder.svg?height=80&width=80"
-            />
-            <TokenCard
-              name="CryptoVerse"
-              symbol="CRVS"
-              price="$0.0089"
-              change="+21.7%"
-              volume="$950K"
-              image="/placeholder.svg?height=80&width=80"
-            />
-          </div>
-          <div className="text-center mt-12">
-            <Link href="/tokens" className="text-primary hover:underline">
-              View all tokens
-              <ArrowRight className="ml-1 h-4 w-4 inline" />
-            </Link>
-          </div>
-        </div>
-      </section>
+      <GraduatedTokens />
 
       {/* Testimonials Section */}
       <section className="py-20 bg-gradient-to-b from-background/50 to-background relative">
