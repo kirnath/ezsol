@@ -16,6 +16,7 @@ interface TokenDetails {
     priceNative: string;
     priceUsd: string;
     symbol: string;
+    priceChange24h: number; // <-- add this line
 }
 
 function formatNumber(numStr: string) {
@@ -50,17 +51,16 @@ export default function GraduatedTokens() {
                       liquidity: token.liquidityUsd?.toString() ?? "0",
                       logo: token.logo || null,
                       name: token.name,
-                      priceNative: "", // Not available in your data
+                      priceNative: "",
                       priceUsd: token.usdPrice?.toString() ?? "0",
                       symbol: token.symbol,
+                      priceChange24h: token.pricePercentChange?.["24h"] ?? 0, // <-- add this line
                   }))
                 : [];
-            console.log("Graduated Tokens:", tokens);
             setGraduatedTokens(tokens);
         };
         fetchGraduatedTokens();
     }, []);
-
     return (
         <section className="py-20 relative">
             <div className="container">
@@ -83,6 +83,7 @@ export default function GraduatedTokens() {
                             liquidity={`$${formatNumber(token.liquidity)}`}
                             image={token.logo || "/placeholder.svg?height=80&width=80"}
                             tokenAddress={token.tokenAddress}
+                            priceChange24h={token.priceChange24h} // <-- add this prop
                         />
                     ))}
                 </div>

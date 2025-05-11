@@ -10,6 +10,7 @@ interface TokenCardProps {
   liquidity: string;
   image: string;
   tokenAddress?: string;
+  priceChange24h?: number; // <-- add this line
 }
 
 const TokenCard = ({
@@ -19,9 +20,13 @@ const TokenCard = ({
   fdv,
   liquidity,
   image,
-  tokenAddress
+  tokenAddress,
+  priceChange24h // <-- add this line
 }: TokenCardProps) => {
-  const isPositive = true;
+  const isPositive = typeof priceChange24h === "number" ? priceChange24h >= 0 : false;
+  const isSmallChange =
+    (typeof priceChange24h === "number" && priceChange24h > 0 && priceChange24h < 0.5) ||
+    priceChange24h == null;
 
   return (
     <a
@@ -47,21 +52,27 @@ const TokenCard = ({
         <div className="space-y-2">
           <div className="flex justify-between items-center">
             <span className="text-sm text-muted-foreground">Price</span>
-            <span className="font-medium">{price}</span>
+            <span
+              className={cn(
+                "flex items-center font-medium",
+                !isSmallChange && (isPositive ? "text-green-500" : "text-red-500")
+              )}
+            >
+              {!isSmallChange ? (
+                isPositive ? (
+                  <ArrowUpRight className="mr-1 h-3 w-3" />
+                ) : (
+                  <ArrowDownRight className="mr-1 h-3 w-3" />
+                )
+              ) : null}
+              {price}
+            </span>
           </div>
           <div className="flex justify-between items-center">
             <span className="text-sm text-muted-foreground">FDV</span>
             <span
-              className={cn(
-                "flex items-center font-medium",
-                isPositive ? "text-green-500" : "text-red-500"
-              )}
-            >
-              {isPositive ? (
-                <ArrowUpRight className="mr-1 h-3 w-3" />
-              ) : (
-                <ArrowDownRight className="mr-1 h-3 w-3" />
-              )}
+              className=
+                "flex items-center font-medium">
               {fdv}
             </span>
           </div>
