@@ -5,7 +5,7 @@ const Footer = () => {
   return (
     <footer className="border-t border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container py-10">
-        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 md:grid-cols-4">
+        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 md:grid-cols-3">
           <div className="space-y-3">
             <h3 className="text-lg font-bold gradient-text">EzSol</h3>
             <p className="text-sm text-muted-foreground">
@@ -26,52 +26,13 @@ const Footer = () => {
               </Link>
             </div>
           </div>
+          <div></div>
           <div>
-            <h3 className="mb-3 text-sm font-semibold">Platform</h3>
-            <ul className="space-y-2 text-sm">
-              <li>
-                <Link href="/create" className="text-muted-foreground hover:text-foreground">
-                  Create Token
-                </Link>
-              </li>
-              <li>
-                <Link href="/dashboard" className="text-muted-foreground hover:text-foreground">
-                  Dashboard
-                </Link>
-              </li>
-              <li>
-                <Link href="/docs" className="text-muted-foreground hover:text-foreground">
-                  Documentation
-                </Link>
-              </li>
-            </ul>
-          </div>
-          <div>
-            <h3 className="mb-3 text-sm font-semibold">Resources</h3>
+            <h3 className="mb-3 text-sm font-semibold">Resource</h3>
             <ul className="space-y-2 text-sm">
               <li>
                 <Link href="/blog" className="text-muted-foreground hover:text-foreground">
                   Blog
-                </Link>
-              </li>
-              <li>
-                <Link href="/tutorials" className="text-muted-foreground hover:text-foreground">
-                  Tutorials
-                </Link>
-              </li>
-              <li>
-                <Link href="/faq" className="text-muted-foreground hover:text-foreground">
-                  FAQ
-                </Link>
-              </li>
-            </ul>
-          </div>
-          <div>
-            <h3 className="mb-3 text-sm font-semibold">Legal</h3>
-            <ul className="space-y-2 text-sm">
-              <li>
-                <Link href="/privacy" className="text-muted-foreground hover:text-foreground">
-                  Privacy Policy
                 </Link>
               </li>
               <li>

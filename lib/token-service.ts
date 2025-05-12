@@ -2,10 +2,7 @@ import { createClient } from "@supabase/supabase-js"
 import type { Connection } from "@solana/web3.js"
 import type { NetworkType } from "@/context/wallet-context"
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
+const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!)
 
 export interface TokenData {
   name: string
@@ -16,6 +13,7 @@ export interface TokenData {
   balance?: string
   decimals: number
   supply?: string
+  network?: NetworkType
 }
 
 /**
@@ -48,6 +46,27 @@ export async function fetchCreatedTokens(
     return coins as TokenData[]
   } catch (error) {
     console.error("Error fetching created tokens:", error)
+    return []
+  }
+}
+
+/**
+ * Fetch all recently created tokens
+ */
+export async function fetchRecentTokens(limit = 20): Promise<TokenData[]> {
+  try {
+    // Get recent coins ordered by creation date
+    const { data: coins, error: coinsError } = await supabase
+      .from("coins")
+      .select("*")
+      .order("createdAt", { ascending: false })
+      .limit(limit)
+
+    if (coinsError || !coins) return []
+
+    return coins as TokenData[]
+  } catch (error) {
+    console.error("Error fetching recent tokens:", error)
     return []
   }
 }
@@ -128,10 +147,7 @@ export async function fetchOwnedTokens(
     if (userError || !user) return []
 
     // Get coins by user id and network
-    const { data: coins, error: coinsError } = await supabase
-      .from("coins")
-      .select("*")
-      .eq("owner_id", user.id)
+    const { data: coins, error: coinsError } = await supabase.from("coins").select("*").eq("owner_id", user.id)
 
     if (coinsError || !coins) return []
 

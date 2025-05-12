@@ -1,7 +1,12 @@
 "use client"
 
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react"
-import { ConnectionProvider, WalletProvider, useWallet, useConnection } from "@solana/wallet-adapter-react"
+import {
+  ConnectionProvider,
+  WalletProvider,
+  useWallet as useWalletAdapter,
+  useConnection,
+} from "@solana/wallet-adapter-react"
 import type { WalletAdapterNetwork } from "@solana/wallet-adapter-base"
 import {
   PhantomWalletAdapter,
@@ -60,10 +65,7 @@ export function WalletContextProvider({ children }: WalletContextProviderProps) 
 
   const HELIUS_RPC = `https://mainnet.helius-rpc.com/?api-key=` + process.env.NEXT_PUBLIC_HELIUS_API_KEY
   // Get the endpoint based on the selected network
-  const endpoint =
-    network === "mainnet-beta"
-      ? HELIUS_RPC
-      : clusterApiUrl(network as WalletAdapterNetwork)
+  const endpoint = network === "mainnet-beta" ? HELIUS_RPC : clusterApiUrl(network as WalletAdapterNetwork)
 
   // Initialize wallet adapters
   const wallets = [
@@ -78,9 +80,7 @@ export function WalletContextProvider({ children }: WalletContextProviderProps) 
     <ConnectionProvider endpoint={endpoint}>
       <WalletProvider wallets={wallets} autoConnect>
         <WalletModalProvider>
-          <WalletContextContent network={network}>
-            {children}
-          </WalletContextContent>
+          <WalletContextContent network={network}>{children}</WalletContextContent>
         </WalletModalProvider>
       </WalletProvider>
     </ConnectionProvider>
@@ -96,7 +96,7 @@ function WalletContextContent({
   network: NetworkType
   setNetwork: (network: NetworkType) => void
 }) {
-  const { publicKey, connected, connecting, wallet, disconnect, select } = useWallet()
+  const { publicKey, connected, connecting, wallet, disconnect, select } = useWalletAdapter()
   const { connection } = useConnection()
   const [balance, setBalance] = useState<number | null>(null)
 
@@ -166,3 +166,5 @@ function WalletContextContent({
 
   return <WalletContext.Provider value={contextValue}>{children}</WalletContext.Provider>
 }
+
+export const useWallet = useWalletAdapter

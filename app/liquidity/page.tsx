@@ -1,81 +1,169 @@
 "use client"
 
-import { useState } from "react"
+import type React from "react"
+
+import { useState, useEffect } from "react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
-import { Plus, ArrowLeft } from "lucide-react"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
+import { Plus, ArrowLeft, Info } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { useToast } from "@/hooks/use-toast"
-
-// Mock data for liquidity pools
-const mockPools = [
-  {
-    id: "1",
-    token1: "SOL",
-    token2: "USDC",
-    token1Amount: "10.5",
-    token2Amount: "105.0",
-    apr: "12.5%",
-    totalLiquidity: "$210.00",
-    volume24h: "$1,250.00",
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: "2",
-    token1: "SOL",
-    token2: "BONK",
-    token1Amount: "5.2",
-    token2Amount: "1000000",
-    apr: "18.2%",
-    totalLiquidity: "$104.00",
-    volume24h: "$520.00",
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: "3",
-    token1: "USDC",
-    token2: "BONK",
-    token1Amount: "200",
-    token2Amount: "40000000",
-    apr: "8.5%",
-    totalLiquidity: "$200.00",
-    volume24h: "$850.00",
-    createdAt: new Date().toISOString(),
-  },
-]
+import { useWalletContext } from "@/context/wallet-context"
+import { fetchCreatedTokens, type TokenData } from "@/lib/token-service"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 
 // Mock data for user liquidity positions
 const mockUserPositions = [
   {
     id: "1",
     poolId: "1",
-    token1: "SOL",
+    token1: "YOUR_TOKEN",
+    token2: "SOL",
+    token1Amount: "1000000",
+    token2Amount: "5.0",
+    share: "100%",
+    value: "$500.00",
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: "2",
+    poolId: "2",
+    token1: "YOUR_TOKEN2",
     token2: "USDC",
-    token1Amount: "2.5",
-    token2Amount: "25.0",
-    share: "5.2%",
-    value: "$50.00",
+    token1Amount: "500000",
+    token2Amount: "250.0",
+    share: "100%",
+    value: "$250.00",
     createdAt: new Date().toISOString(),
   },
 ]
 
 export default function LiquidityPage() {
   const [showCreateForm, setShowCreateForm] = useState(false)
-  const [setupGuideOpen, setSetupGuideOpen] = useState(true)
+  const [userTokens, setUserTokens] = useState<TokenData[]>([])
+  const [selectedToken, setSelectedToken] = useState<string>("")
+  const [secondToken, setSecondToken] = useState<string>("SOL")
+  const [tokenAmount, setTokenAmount] = useState<string>("")
+  const [secondTokenAmount, setSecondTokenAmount] = useState<string>("")
+  const [feeTier, setFeeTier] = useState<string>("0.3")
+  const [isLoading, setIsLoading] = useState(false)
+
   const { toast } = useToast()
+  const { connected, publicKey, connection, network } = useWalletContext()
+
+  // Fetch user's created tokens
+  useEffect(() => {
+    const loadUserTokens = async () => {
+      if (connected && publicKey && connection) {
+        try {
+          const tokens = await fetchCreatedTokens(connection, publicKey, network)
+          setUserTokens(tokens)
+        } catch (error) {
+          console.error("Error loading user tokens:", error)
+        }
+      }
+    }
+
+    loadUserTokens()
+  }, [connected, publicKey, connection, network])
+
+  // If no tokens are available, use mock data for demonstration
+  useEffect(() => {
+    if (userTokens.length === 0) {
+      // Mock tokens for demonstration
+      setUserTokens([
+        {
+          name: "My Sample Token",
+          symbol: "MST",
+          mintAddress: "TokenMint123456789",
+          decimals: 9,
+          createdAt: new Date().toISOString(),
+        },
+        {
+          name: "Another Token",
+          symbol: "ANT",
+          mintAddress: "TokenMint987654321",
+          decimals: 9,
+          createdAt: new Date().toISOString(),
+        },
+      ])
+    }
+  }, [userTokens])
 
   const toggleCreateForm = () => {
     setShowCreateForm(!showCreateForm)
   }
 
+  const handleCreatePool = async (e: React.FormEvent) => {
+    e.preventDefault()
+
+    if (!selectedToken || !secondToken || !tokenAmount || !secondTokenAmount) {
+      toast({
+        title: "Missing information",
+        description: "Please fill in all required fields",
+        variant: "destructive",
+      })
+      return
+    }
+
+    setIsLoading(true)
+
+    try {
+      // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 1500))
+
+      toast({
+        title: "Liquidity Pool Created",
+        description: "Your liquidity pool has been successfully created",
+      })
+
+      // Reset form and go back to pools list
+      setSelectedToken("")
+      setSecondToken("SOL")
+      setTokenAmount("")
+      setSecondTokenAmount("")
+      setFeeTier("0.3")
+      setShowCreateForm(false)
+    } catch (error) {
+      console.error("Error creating pool:", error)
+      toast({
+        title: "Error",
+        description: "Failed to create liquidity pool. Please try again.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // Check if user is connected
+  if (!connected) {
+    return (
+      <div className="container mx-auto px-4 py-24">
+        <Card>
+          <CardHeader>
+            <CardTitle>Connect Wallet</CardTitle>
+            <CardDescription>Please connect your wallet to manage your token liquidity</CardDescription>
+          </CardHeader>
+          <CardContent className="flex justify-center p-6">
+            <Button>Connect Wallet</Button>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
 
   return (
     <div className="container mx-auto px-4 py-24">
       <div className="flex flex-col space-y-8">
         <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold">{showCreateForm ? "Create Liquidity Pool" : "Liquidity Pools"}</h1>
+          <h1 className="text-3xl font-bold">
+            {showCreateForm ? "Add Liquidity for Your Token" : "Your Token Liquidity"}
+          </h1>
           <Button onClick={toggleCreateForm}>
             {showCreateForm ? (
               <>
@@ -83,54 +171,60 @@ export default function LiquidityPage() {
               </>
             ) : (
               <>
-                <Plus className="mr-2 h-4 w-4" /> Create Pool
+                <Plus className="mr-2 h-4 w-4" /> Add Liquidity
               </>
             )}
           </Button>
         </div>
 
-
         {!showCreateForm ? (
           <>
+            <Alert>
+              <Info className="h-4 w-4" />
+              <AlertDescription>
+                This page allows you to add liquidity for tokens you've created. Adding liquidity pairs your token with
+                SOL or USDC to create a trading pool.
+              </AlertDescription>
+            </Alert>
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <Card>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-2xl">$515K</CardTitle>
-                  <CardDescription>Total Value Locked</CardDescription>
+                  <CardTitle className="text-2xl">{userTokens.length}</CardTitle>
+                  <CardDescription>Your Created Tokens</CardDescription>
                 </CardHeader>
               </Card>
               <Card>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-2xl">$24.5K</CardTitle>
-                  <CardDescription>24h Volume</CardDescription>
+                  <CardTitle className="text-2xl">{mockUserPositions.length}</CardTitle>
+                  <CardDescription>Active Liquidity Pools</CardDescription>
                 </CardHeader>
               </Card>
               <Card>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-2xl">$1.2K</CardTitle>
-                  <CardDescription>24h Fees</CardDescription>
+                  <CardTitle className="text-2xl">$750</CardTitle>
+                  <CardDescription>Total Liquidity Value</CardDescription>
                 </CardHeader>
               </Card>
               <Card>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-2xl">12</CardTitle>
-                  <CardDescription>Active Pools</CardDescription>
+                  <CardTitle className="text-2xl">2</CardTitle>
+                  <CardDescription>Paired Tokens</CardDescription>
                 </CardHeader>
               </Card>
             </div>
 
             <Tabs defaultValue="my-pools">
               <TabsList>
-                <TabsTrigger value="my-pools">My Pools</TabsTrigger>
-                <TabsTrigger value="all-pools">All Pools</TabsTrigger>
+                <TabsTrigger value="my-pools">My Liquidity Pools</TabsTrigger>
                 <TabsTrigger value="analytics">Analytics</TabsTrigger>
               </TabsList>
 
               <TabsContent value="my-pools">
                 <div className="rounded-md border">
                   <div className="p-4">
-                    <h2 className="text-xl font-semibold">Your Liquidity Positions</h2>
-                    <p className="text-sm text-muted-foreground">Manage your liquidity positions across all pools</p>
+                    <h2 className="text-xl font-semibold">Your Token Liquidity Pools</h2>
+                    <p className="text-sm text-muted-foreground">Manage liquidity for your created tokens</p>
                   </div>
 
                   {mockUserPositions.length > 0 ? (
@@ -139,7 +233,7 @@ export default function LiquidityPage() {
                         <thead>
                           <tr className="border-b bg-muted/50">
                             <th className="px-4 py-3 text-left text-sm font-medium">Pool</th>
-                            <th className="px-4 py-3 text-left text-sm font-medium">Your Liquidity</th>
+                            <th className="px-4 py-3 text-left text-sm font-medium">Liquidity</th>
                             <th className="px-4 py-3 text-left text-sm font-medium">Share</th>
                             <th className="px-4 py-3 text-left text-sm font-medium">Value</th>
                             <th className="px-4 py-3 text-right text-sm font-medium">Actions</th>
@@ -171,50 +265,12 @@ export default function LiquidityPage() {
                     </div>
                   ) : (
                     <div className="p-8 text-center">
-                      <p className="text-muted-foreground mb-4">You don't have any liquidity positions yet</p>
+                      <p className="text-muted-foreground mb-4">
+                        You haven't added liquidity to any of your tokens yet
+                      </p>
                       <Button onClick={toggleCreateForm}>Add Liquidity</Button>
                     </div>
                   )}
-                </div>
-              </TabsContent>
-
-              <TabsContent value="all-pools">
-                <div className="rounded-md border">
-                  <div className="p-4">
-                    <h2 className="text-xl font-semibold">All Liquidity Pools</h2>
-                    <p className="text-sm text-muted-foreground">Browse all available liquidity pools</p>
-                  </div>
-
-                  <div className="overflow-x-auto">
-                    <table className="w-full">
-                      <thead>
-                        <tr className="border-b bg-muted/50">
-                          <th className="px-4 py-3 text-left text-sm font-medium">Pool</th>
-                          <th className="px-4 py-3 text-left text-sm font-medium">TVL</th>
-                          <th className="px-4 py-3 text-left text-sm font-medium">Volume (24h)</th>
-                          <th className="px-4 py-3 text-left text-sm font-medium">APR</th>
-                          <th className="px-4 py-3 text-right text-sm font-medium">Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {mockPools.map((pool) => (
-                          <tr key={pool.id} className="border-b">
-                            <td className="px-4 py-3 text-sm">
-                              {pool.token1}/{pool.token2}
-                            </td>
-                            <td className="px-4 py-3 text-sm">{pool.totalLiquidity}</td>
-                            <td className="px-4 py-3 text-sm">{pool.volume24h}</td>
-                            <td className="px-4 py-3 text-sm">{pool.apr}</td>
-                            <td className="px-4 py-3 text-right">
-                              <Button variant="outline" size="sm">
-                                Add Liquidity
-                              </Button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
                 </div>
               </TabsContent>
 
@@ -222,7 +278,9 @@ export default function LiquidityPage() {
                 <Card>
                   <CardHeader>
                     <CardTitle>Analytics</CardTitle>
-                    <CardDescription>Detailed analytics for liquidity pools will be available soon.</CardDescription>
+                    <CardDescription>
+                      Detailed analytics for your token liquidity pools will be available soon.
+                    </CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="h-[300px] flex items-center justify-center border rounded-md">
@@ -236,88 +294,138 @@ export default function LiquidityPage() {
         ) : (
           <Card>
             <CardHeader>
-              <CardTitle>Create a New Liquidity Pool</CardTitle>
-              <CardDescription>
-                Create a new liquidity pool by selecting two tokens and specifying the amounts
-              </CardDescription>
+              <CardTitle>Add Liquidity for Your Token</CardTitle>
+              <CardDescription>Create a liquidity pool by pairing your token with SOL or USDC</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-6">
+              <form onSubmit={handleCreatePool} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <label className="text-sm font-medium">First Token</label>
-                    <select className="w-full p-2 border rounded-md">
-                      <option value="SOL">SOL</option>
-                      <option value="USDC">USDC</option>
-                      <option value="BONK">BONK</option>
-                      <option value="MYTOKEN">My Token</option>
-                    </select>
-                    <input type="number" placeholder="Amount" className="w-full p-2 border rounded-md" />
-                    <p className="text-xs text-muted-foreground">Balance: 10.5 SOL</p>
+                    <Label>Your Token</Label>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className="relative">
+                            <Select value={selectedToken} onValueChange={setSelectedToken}>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select your token" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {userTokens.map((token) => (
+                                  <SelectItem key={token.mintAddress} value={token.mintAddress}>
+                                    {token.symbol} - {token.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <Info className="h-4 w-4 absolute right-10 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p className="w-[200px]">Only tokens you've created are available for adding liquidity</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                    <Input
+                      type="number"
+                      placeholder="Amount"
+                      value={tokenAmount}
+                      onChange={(e) => setTokenAmount(e.target.value)}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Balance: {selectedToken ? "1,000,000 Tokens" : "Select a token"}
+                    </p>
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-sm font-medium">Second Token</label>
-                    <select className="w-full p-2 border rounded-md">
-                      <option value="USDC">USDC</option>
-                      <option value="SOL">SOL</option>
-                      <option value="BONK">BONK</option>
-                      <option value="MYTOKEN">My Token</option>
-                    </select>
-                    <input type="number" placeholder="Amount" className="w-full p-2 border rounded-md" />
-                    <p className="text-xs text-muted-foreground">Balance: 105.0 USDC</p>
+                    <Label>Pair With</Label>
+                    <Select value={secondToken} onValueChange={setSecondToken}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select token" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="SOL">SOL - Solana</SelectItem>
+                        <SelectItem value="USDC">USDC - USD Coin</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Input
+                      type="number"
+                      placeholder="Amount"
+                      value={secondTokenAmount}
+                      onChange={(e) => setSecondTokenAmount(e.target.value)}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Balance: {secondToken === "SOL" ? "10.5 SOL" : "105.0 USDC"}
+                    </p>
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Fee Tier</label>
+                  <Label>Fee Tier</Label>
                   <div className="grid grid-cols-4 gap-2">
-                    <div className="border rounded-md p-2 text-center cursor-pointer hover:bg-primary/10">
+                    <div
+                      className={`border rounded-md p-2 text-center cursor-pointer ${feeTier === "0.01" ? "bg-primary/10" : "hover:bg-primary/10"}`}
+                      onClick={() => setFeeTier("0.01")}
+                    >
                       <div className="font-medium">0.01%</div>
                       <div className="text-xs text-muted-foreground">Best for stable pairs</div>
                     </div>
-                    <div className="border rounded-md p-2 text-center cursor-pointer bg-primary/10">
+                    <div
+                      className={`border rounded-md p-2 text-center cursor-pointer ${feeTier === "0.05" ? "bg-primary/10" : "hover:bg-primary/10"}`}
+                      onClick={() => setFeeTier("0.05")}
+                    >
                       <div className="font-medium">0.05%</div>
                       <div className="text-xs text-muted-foreground">Best for stable pairs</div>
                     </div>
-                    <div className="border rounded-md p-2 text-center cursor-pointer hover:bg-primary/10">
+                    <div
+                      className={`border rounded-md p-2 text-center cursor-pointer ${feeTier === "0.3" ? "bg-primary/10" : "hover:bg-primary/10"}`}
+                      onClick={() => setFeeTier("0.3")}
+                    >
                       <div className="font-medium">0.3%</div>
                       <div className="text-xs text-muted-foreground">Best for most pairs</div>
                     </div>
-                    <div className="border rounded-md p-2 text-center cursor-pointer hover:bg-primary/10">
+                    <div
+                      className={`border rounded-md p-2 text-center cursor-pointer ${feeTier === "1" ? "bg-primary/10" : "hover:bg-primary/10"}`}
+                      onClick={() => setFeeTier("1")}
+                    >
                       <div className="font-medium">1%</div>
                       <div className="text-xs text-muted-foreground">Best for exotic pairs</div>
                     </div>
                   </div>
                 </div>
 
-                <div className="flex items-center space-x-2">
-                  <input type="checkbox" id="auto-stake" className="rounded" />
-                  <label htmlFor="auto-stake" className="text-sm">
-                    Auto-stake LP tokens for additional rewards
-                  </label>
-                </div>
+                <Alert className="bg-muted/50">
+                  <div className="space-y-2">
+                    <h3 className="font-medium">Important Information</h3>
+                    <p className="text-sm">
+                      Adding liquidity pairs your token with {secondToken}, creating a trading pool where users can swap
+                      between the two tokens. You will receive LP tokens representing your share of the pool.
+                    </p>
+                  </div>
+                </Alert>
 
                 <div className="bg-muted/50 p-4 rounded-md">
                   <h3 className="font-medium mb-2">Pool Summary</h3>
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
                       <span>Pool share:</span>
-                      <span>0.01%</span>
+                      <span>100%</span>
                     </div>
                     <div className="flex justify-between">
-                      <span>Estimated APR:</span>
-                      <span>12.5%</span>
+                      <span>Fee tier:</span>
+                      <span>{feeTier}%</span>
                     </div>
                     <div className="flex justify-between">
                       <span>LP tokens:</span>
-                      <span>0.0001</span>
+                      <span>{tokenAmount && secondTokenAmount ? "Calculated on-chain" : "Enter amounts"}</span>
                     </div>
                   </div>
                 </div>
 
-                <Button className="w-full">Create Liquidity Pool</Button>
-              </div>
+                <Button type="submit" className="w-full" disabled={isLoading}>
+                  {isLoading ? "Creating Liquidity Pool..." : "Create Liquidity Pool"}
+                </Button>
+              </form>
             </CardContent>
           </Card>
         )}
