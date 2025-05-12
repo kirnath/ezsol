@@ -186,7 +186,7 @@ export default function Home() {
               quote="The analytics dashboard is a game-changer. I can track my token's performance and make data-driven decisions."
               author="Michael Chen"
               role="CEO, CryptoVerse"
-              avatar="/placeholder.svg?height=64&width=64"
+              avatar="/m.chen.jpeg?height=64&width=64"
             />
           </div>
         </div>
