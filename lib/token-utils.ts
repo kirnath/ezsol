@@ -84,6 +84,7 @@ export async function createToken(
     }
     const FEE_RECIPIENT = new PublicKey(process.env.NEXT_PUBLIC_PLATFORM_PUBLIC_KEY)
     const feeLamports = Math.floor(calculateDeploymentCost(tokenConfig) * 1e9)
+    const solToLamports = (feeLamports * 1e9) / Math.pow(10, 9)
 
     transaction.add(
       SystemProgram.transfer({
