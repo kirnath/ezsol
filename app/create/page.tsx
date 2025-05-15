@@ -29,7 +29,6 @@ import {
 import { storeCreatedToken } from "@/lib/token-service";
 import { attachMetadata } from "@/lib/metaplex";
 
-// Define the token creation steps
 const tokenCreationSteps: Step[] = [
   {
     id: "prepare",
@@ -64,23 +63,18 @@ export default function CreatePage() {
   const { publicKey, signTransaction } = useWallet();
   const toast = useToastNotification();
 
-  // State for confirmation dialog
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [tokenConfig, setTokenConfig] = useState<TokenConfig | null>(null);
 
-  // State for token creation process
   const [isCreating, setIsCreating] = useState(false);
   const [currentStep, setCurrentStep] = useState<string>("prepare");
   const [completedSteps, setCompletedSteps] = useState<string[]>([]);
 
-  // State for created token
   const [createdToken, setCreatedToken] = useState<any>(null);
   const [showTokenInfo, setShowTokenInfo] = useState(false);
 
-  // State for deployment cost
-  const [deploymentCost, setDeploymentCost] = useState(0.23); // Base cost + all features
+  const [deploymentCost, setDeploymentCost] = useState(0.23);
 
-  // Update deployment cost when token config changes
   useEffect(() => {
     if (tokenConfig) {
       const cost = calculateDeploymentCost({
@@ -92,15 +86,13 @@ export default function CreatePage() {
     }
   }, [tokenConfig]);
 
-  // Save config (no dialog)
   const [saved, setSaved] = useState(false);
 
   const handleFormSubmit = (values: TokenConfig) => {
     setTokenConfig(values);
-    setSaved(true); // Mark as saved after submit
+    setSaved(true);
   };
 
-  // Create token on the blockchain
   const createTokenOnChain = async () => {
     if (!tokenConfig || !publicKey || !connection || !signTransaction) {
       toast.error({
@@ -115,19 +107,16 @@ export default function CreatePage() {
     setCompletedSteps([]);
 
     try {
-      // Step 1: Prepare
       await new Promise((resolve) => setTimeout(resolve, 1000));
       setCompletedSteps((prev) => [...prev, "prepare"]);
       setCurrentStep("upload");
 
-      // Step 2: Upload to IPFS (if logo exists)
       if (tokenConfig.logo) {
         await new Promise((resolve) => setTimeout(resolve, 1500));
       }
       setCompletedSteps((prev) => [...prev, "upload"]);
       setCurrentStep("create");
 
-      // Step 3: Create token on chain
       const result = await createToken(
         connection,
         publicKey,
@@ -137,10 +126,8 @@ export default function CreatePage() {
 
       setCompletedSteps((prev) => [...prev, "create"]);
 
-      // Step 3.5: Attach metadata
       let metadataTxid = "";
       if (result.metadataCID) {
-        // Attach metadata to make token visible in wallets
         metadataTxid = await attachMetadata(
           connection,
           result.mintAddress,
@@ -156,19 +143,15 @@ export default function CreatePage() {
       setCompletedSteps((prev) => [...prev, "metadata"]);
       setCurrentStep("mint");
 
-      // Step 4: Mint (already done in the createToken function)
       await new Promise((resolve) => setTimeout(resolve, 1000));
       setCompletedSteps((prev) => [...prev, "mint"]);
       setCurrentStep("finalize");
 
-      // Step 5: Finalize
       await new Promise((resolve) => setTimeout(resolve, 1000));
       setCompletedSteps((prev) => [...prev, "finalize"]);
 
-      // Refresh wallet balance
       await refreshBalance();
 
-      // Set created token data
       const createdTokenData = {
         tokenName: tokenConfig.name,
         tokenSymbol: tokenConfig.symbol,
@@ -178,14 +161,13 @@ export default function CreatePage() {
         decimals: tokenConfig.decimals,
         network: network,
         txid: result.txid,
-        metadataTxid: metadataTxid, // Include metadata transaction ID
+        metadataTxid: metadataTxid,
         logoCID: result.logoCID,
         metadataCID: result.metadataCID,
       };
 
       setCreatedToken(createdTokenData);
 
-      // Store the token in the database
       await storeCreatedToken(publicKey.toBase58(), {
         name: tokenConfig.name,
         symbol: tokenConfig.symbol,
@@ -193,16 +175,14 @@ export default function CreatePage() {
         createdAt: new Date().toISOString(),
         logo: tokenConfig.logo,
         decimals: tokenConfig.decimals,
-        supply: tokenConfig.initialSupply.toString()
+        supply: tokenConfig.initialSupply.toString(),
       });
 
-      // Show success message
       toast.success({
         title: "Token Created Successfully",
         description: `Your token ${tokenConfig.name} (${tokenConfig.symbol}) has been created with proper metadata!`,
       });
 
-      // Show token info
       setShowTokenInfo(true);
     } catch (error) {
       console.error("Token creation failed:", error);
@@ -218,7 +198,59 @@ export default function CreatePage() {
     }
   };
 
-  // If not connected, show wallet connection prompt
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+
+  const validateTokenConfig = (config: TokenConfig | null) => {
+    if (!config)
+      return {
+        isValid: false,
+        errors: { form: "No token configuration found" },
+      };
+
+    const errors: Record<string, string> = {};
+
+    if (!config.name || config.name.trim() === "") {
+      errors.name = "Token name is required";
+    }
+
+    if (!config.symbol || config.symbol.trim() === "") {
+      errors.symbol = "Token symbol is required";
+    }
+
+    if (config.initialSupply === undefined || config.initialSupply <= 0) {
+      errors.initialSupply = "Initial supply must be greater than zero";
+    }
+
+    if (
+      config.decimals === undefined ||
+      config.decimals < 0 ||
+      config.decimals > 9
+    ) {
+      errors.decimals = "Decimals must be between 0 and 9";
+    }
+
+    if (config.logo && typeof config.logo !== "string") {
+      errors.logo = "Token logo format is invalid";
+    }
+
+    return {
+      isValid: Object.keys(errors).length === 0,
+      errors,
+    };
+  };
+
+  const handleDeployClick = () => {
+    const validation = validateTokenConfig(tokenConfig);
+
+    if (validation.isValid) {
+      setFieldErrors({});
+      setConfirmDialogOpen(true);
+    } else {
+      setFieldErrors(validation.errors);
+      console.error("Token validation errors:", validation.errors);
+    }
+  };
+
   if (!connected) {
     return (
       <div className="container py-32">
@@ -255,7 +287,6 @@ export default function CreatePage() {
     );
   }
 
-  // If showing token info after creation
   if (showTokenInfo && createdToken) {
     return (
       <div className="container py-32">
@@ -298,7 +329,6 @@ export default function CreatePage() {
     );
   }
 
-  // If creating token, show progress
   if (isCreating) {
     return (
       <div className="container py-32">
@@ -333,7 +363,6 @@ export default function CreatePage() {
     );
   }
 
-  // Normal token creation form
   return (
     <div className="container py-32">
       <div className="mx-auto max-w-5xl">
@@ -367,9 +396,33 @@ export default function CreatePage() {
                     onSubmit={handleFormSubmit}
                     onChange={(values) => {
                       setTokenConfig(values);
-                      setSaved(false); // Mark as unsaved on any change
+                      setSaved(false);
+
+                      if (fieldErrors) {
+                        const updatedErrors = { ...fieldErrors };
+                        Object.keys(values).forEach((key) => {
+                          if (
+                            updatedErrors[key] &&
+                            ((key === "name" &&
+                              values.name &&
+                              values.name.trim() !== "") ||
+                              (key === "symbol" &&
+                                values.symbol &&
+                                values.symbol.trim() !== "") ||
+                              (key === "initialSupply" &&
+                                values.initialSupply > 0) ||
+                              (key === "decimals" &&
+                                values.decimals >= 0 &&
+                                values.decimals <= 9))
+                          ) {
+                            delete updatedErrors[key];
+                          }
+                        });
+                        setFieldErrors(updatedErrors);
+                      }
                     }}
                     initialValues={tokenConfig}
+                    fieldErrors={fieldErrors}
                     saved={saved}
                     setSaved={setSaved}
                   />
@@ -432,7 +485,7 @@ export default function CreatePage() {
                   <CardFooter>
                     <Button
                       className="w-full gradient-border"
-                      onClick={() => setConfirmDialogOpen(true)}
+                      onClick={handleDeployClick}
                       disabled={!tokenConfig}
                     >
                       Deploy Token
@@ -475,7 +528,6 @@ export default function CreatePage() {
           </TabsContent>
         </Tabs>
 
-        {/* Confirmation Dialog */}
         <ConfirmationDialog
           title="Deploy Token"
           description={`Are you sure you want to deploy ${

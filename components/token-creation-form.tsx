@@ -51,6 +51,7 @@ interface TokenCreationFormProps {
   initialValues?: TokenFormValues
   saved?: boolean
   setSaved?: (v: boolean) => void
+  fieldErrors?: Record<string, string>
 }
 
 export default function TokenCreationForm({
@@ -59,6 +60,7 @@ export default function TokenCreationForm({
   initialValues,
   saved,
   setSaved,
+  fieldErrors,
 }: TokenCreationFormProps) {
   const [logoPreview, setLogoPreview] = useState<string | null>(null)
 
@@ -144,10 +146,17 @@ export default function TokenCreationForm({
               <FormItem>
                 <FormLabel>Token Name <span className="text-red-800 font-bold">*</span></FormLabel>
                 <FormControl>
-                  <Input placeholder="My Token" {...field} />
+                  <Input
+                    placeholder="My Token"
+                    {...field}
+                    id="name"
+                    name="name"
+                    className={fieldErrors?.name ? "border-red-500 focus:ring-red-500" : ""}
+                  />
                 </FormControl>
                 <FormDescription>The full name of your token.</FormDescription>
                 <FormMessage />
+                
               </FormItem>
             )}
           />
@@ -159,7 +168,13 @@ export default function TokenCreationForm({
               <FormItem>
                 <FormLabel>Token Symbol <span className="text-red-800 font-bold">*</span></FormLabel>
                 <FormControl>
-                  <Input placeholder="MTK" {...field} />
+                  <Input
+                    placeholder="MTK"
+                    {...field}
+                    id="symbol"
+                    name="symbol"
+                    className={fieldErrors?.symbol ? "border-red-500 focus:ring-red-500" : ""}
+                  />
                 </FormControl>
                 <FormDescription>The ticker symbol for your token.</FormDescription>
                 <FormMessage />
@@ -175,7 +190,13 @@ export default function TokenCreationForm({
             <FormItem>
               <FormLabel>Description <span className="text-red-800 font-bold">*</span></FormLabel>
               <FormControl>
-                <Textarea placeholder="A brief description of your token..." {...field} />
+                <Textarea
+                  placeholder="A brief description of your token..."
+                  {...field}
+                  id="description"
+                  name="description"
+                  className={fieldErrors?.description ? "border-red-500 focus:ring-red-500" : ""}
+                />
               </FormControl>
               <FormDescription>Describe the purpose of your token.</FormDescription>
               <FormMessage />
@@ -218,6 +239,9 @@ export default function TokenCreationForm({
                   min={0}
                   {...field}
                   onChange={(e) => field.onChange(Number(e.target.value))}
+                  id="initialSupply"
+                  name="initialSupply"
+                  className={fieldErrors?.initialSupply ? "border-red-500 focus:ring-red-500" : ""}
                 />
               </FormControl>
               <FormDescription>
