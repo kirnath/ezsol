@@ -142,7 +142,7 @@ export default function TokenCreationForm({
             name="name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Token Name</FormLabel>
+                <FormLabel>Token Name <span className="text-red-800 font-bold">*</span></FormLabel>
                 <FormControl>
                   <Input placeholder="My Token" {...field} />
                 </FormControl>
@@ -157,7 +157,7 @@ export default function TokenCreationForm({
             name="symbol"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Token Symbol</FormLabel>
+                <FormLabel>Token Symbol <span className="text-red-800 font-bold">*</span></FormLabel>
                 <FormControl>
                   <Input placeholder="MTK" {...field} />
                 </FormControl>
@@ -173,7 +173,7 @@ export default function TokenCreationForm({
           name="description"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Description (Optional)</FormLabel>
+              <FormLabel>Description <span className="text-red-800 font-bold">*</span></FormLabel>
               <FormControl>
                 <Textarea placeholder="A brief description of your token..." {...field} />
               </FormControl>
