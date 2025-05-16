@@ -174,13 +174,13 @@ export default function Home() {
               quote="EzSol made it incredibly easy to launch my community token. The process was smooth and the support team was amazing!"
               author="Alex Johnson"
               role="Founder, GalaxyToken"
-              avatar="/placeholder.svg?height=64&width=64"
+              avatar="/a.johnson.webp?height=64&width=64"
             />
             <Testimonial
               quote="As someone with no coding experience, I never thought I could create my own token. EzSol changed that. Highly recommended!"
               author="Sarah Williams"
               role="Creator, NeonFinance"
-              avatar="/placeholder.svg?height=64&width=64"
+              avatar="/s.william.jpg?height=64&width=64"
             />
             <Testimonial
               quote="The analytics dashboard is a game-changer. I can track my token's performance and make data-driven decisions."
