@@ -262,7 +262,26 @@ CREATE TABLE IF NOT EXISTS public.user_liquidity (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+-- Create completed_tokens table
+CREATE TABLE IF NOT EXISTS public.completed_tokens (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  token_name TEXT NOT NULL,
+  token_symbol TEXT NOT NULL,
+  token_logo TEXT,
+  mint_address TEXT NOT NULL,
+  supply TEXT NOT NULL,
+  decimals INTEGER NOT NULL,
+  network TEXT NOT NULL,
+  txid TEXT NOT NULL,
+  metadata_txid TEXT,
+  logo_cid TEXT,
+  metadata_cid TEXT,
+  wallet_address TEXT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
 -- Create indexes for better performance
 CREATE INDEX IF NOT EXISTS idx_user_liquidity_user_wallet ON public.user_liquidity(user_wallet);
 CREATE INDEX IF NOT EXISTS idx_user_liquidity_pool_id ON public.user_liquidity(pool_id);
+CREATE INDEX IF NOT EXISTS idx_completed_tokens_wallet_address ON public.completed_tokens(wallet_address);
 `

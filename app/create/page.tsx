@@ -19,7 +19,6 @@ import TokenPreview from "@/components/token-preview";
 import { Wallet } from "lucide-react";
 import { ConfirmationDialog } from "@/components/confirmation-dialog";
 import { ProgressSteps, type Step } from "@/components/progress-steps";
-import { TokenInfoCard } from "@/components/token-info-card";
 import { useToastNotification } from "@/components/toast-notification";
 import {
   createToken,
@@ -28,6 +27,9 @@ import {
 } from "@/lib/token-utils";
 import { storeCreatedToken } from "@/lib/token-service";
 import { attachMetadata } from "@/lib/metaplex";
+import { useRouter } from "next/navigation";
+import { storeTokenCompletion } from "@/lib/token-completion-service";
+import { GoogleAnalytics } from "@next/third-parties/google";
 
 const tokenCreationSteps: Step[] = [
   {
@@ -62,6 +64,7 @@ export default function CreatePage() {
   const { setVisible } = useWalletModal();
   const { publicKey, signTransaction } = useWallet();
   const toast = useToastNotification();
+  const router = useRouter();
 
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [tokenConfig, setTokenConfig] = useState<TokenConfig | null>(null);
@@ -71,9 +74,14 @@ export default function CreatePage() {
   const [completedSteps, setCompletedSteps] = useState<string[]>([]);
 
   const [createdToken, setCreatedToken] = useState<any>(null);
-  const [showTokenInfo, setShowTokenInfo] = useState(false);
+  const [tokenCompletionId, setTokenCompletionId] = useState<string | null>(
+    null
+  );
 
   const [deploymentCost, setDeploymentCost] = useState(0.23);
+
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [saved, setSaved] = useState(false);
 
   useEffect(() => {
     if (tokenConfig) {
@@ -86,7 +94,12 @@ export default function CreatePage() {
     }
   }, [tokenConfig]);
 
-  const [saved, setSaved] = useState(false);
+  useEffect(() => {
+    if (createdToken && tokenCompletionId) {
+      // Redirect to the completed page with the token ID
+      router.push(`/completed?id=${tokenCompletionId}`);
+    }
+  }, [createdToken, tokenCompletionId, router]);
 
   const handleFormSubmit = (values: TokenConfig) => {
     setTokenConfig(values);
@@ -164,10 +177,17 @@ export default function CreatePage() {
         metadataTxid: metadataTxid,
         logoCID: result.logoCID,
         metadataCID: result.metadataCID,
+        walletAddress: publicKey.toBase58(),
       };
 
-      setCreatedToken(createdTokenData);
+      // Store in localStorage as a fallback
+      localStorage.setItem("createdToken", JSON.stringify(createdTokenData));
 
+      // Store in Supabase
+      const completionId = await storeTokenCompletion(createdTokenData);
+      setTokenCompletionId(completionId);
+
+      // Store in token service
       await storeCreatedToken(publicKey.toBase58(), {
         name: tokenConfig.name,
         symbol: tokenConfig.symbol,
@@ -183,7 +203,7 @@ export default function CreatePage() {
         description: `Your token ${tokenConfig.name} (${tokenConfig.symbol}) has been created with proper metadata!`,
       });
 
-      setShowTokenInfo(true);
+      setCreatedToken(createdTokenData);
     } catch (error) {
       console.error("Token creation failed:", error);
       toast.error({
@@ -197,8 +217,6 @@ export default function CreatePage() {
       setIsCreating(false);
     }
   };
-
-  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const validateTokenConfig = (config: TokenConfig | null) => {
     if (!config)
@@ -253,79 +271,41 @@ export default function CreatePage() {
 
   if (!connected) {
     return (
-      <div className="container py-32">
-        <div className="mx-auto max-w-5xl">
-          <div className="text-center mb-10">
-            <h1 className="text-4xl font-bold tracking-tight gradient-text">
-              Create Your Token
-            </h1>
-            <p className="mt-4 text-muted-foreground">
-              Connect your wallet to start creating your Solana token.
-            </p>
-          </div>
+      <>
+        <GoogleAnalytics gaId="AW-17086610736" />
+        <div className="container py-32">
+          <div className="mx-auto max-w-5xl">
+            <div className="text-center mb-10">
+              <h1 className="text-4xl font-bold tracking-tight gradient-text">
+                Create Your Token
+              </h1>
+              <p className="mt-4 text-muted-foreground">
+                Connect your wallet to start creating your Solana token.
+              </p>
+            </div>
 
-          <Card className="mx-auto max-w-md">
-            <CardHeader>
-              <CardTitle>Wallet Required</CardTitle>
-              <CardDescription>
-                You need to connect a Solana wallet to create and deploy tokens.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="flex flex-col items-center justify-center py-6 space-y-4">
-              <Wallet className="h-12 w-12 text-muted-foreground" />
-              <p className="text-muted-foreground">No wallet connected</p>
-              <Button
-                onClick={() => setVisible(true)}
-                className="gradient-border"
-              >
-                Connect Wallet
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    );
-  }
-
-  if (showTokenInfo && createdToken) {
-    return (
-      <div className="container py-32">
-        <div className="mx-auto max-w-2xl">
-          <div className="text-center mb-10">
-            <h1 className="text-4xl font-bold tracking-tight gradient-text">
-              Token Created!
-            </h1>
-            <p className="mt-4 text-muted-foreground">
-              Your token has been successfully created on the Solana blockchain.
-            </p>
-          </div>
-
-          <TokenInfoCard
-            {...createdToken}
-            onClose={() => setShowTokenInfo(false)}
-          />
-
-          <div className="mt-8 flex justify-center gap-4">
-            <Button
-              variant="outline"
-              className="border-border/50"
-              onClick={() => {
-                setShowTokenInfo(false);
-                setCreatedToken(null);
-                setTokenConfig(null);
-              }}
-            >
-              Create Another Token
-            </Button>
-            <Button
-              className="gradient-border"
-              onClick={() => (window.location.href = "/dashboard")}
-            >
-              Go to Dashboard
-            </Button>
+            <Card className="mx-auto max-w-md">
+              <CardHeader>
+                <CardTitle>Wallet Required</CardTitle>
+                <CardDescription>
+                  You need to connect a Solana wallet to create and deploy
+                  tokens.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="flex flex-col items-center justify-center py-6 space-y-4">
+                <Wallet className="h-12 w-12 text-muted-foreground" />
+                <p className="text-muted-foreground">No wallet connected</p>
+                <Button
+                  onClick={() => setVisible(true)}
+                  className="gradient-border"
+                >
+                  Connect Wallet
+                </Button>
+              </CardContent>
+            </Card>
           </div>
         </div>
-      </div>
+      </>
     );
   }
 
