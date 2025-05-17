@@ -6,6 +6,7 @@ import { ThemeProvider } from "@/components/theme-provider"
 import { WalletContextProvider } from "@/context/wallet-context"
 import Navbar from "@/components/navbar"
 import Footer from "@/components/footer"
+import { GoogleTagManager } from "@next/third-parties/google"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -26,6 +27,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.className} min-h-screen bg-gradient-to-b from-background to-background/80 antialiased`}>
+      <GoogleTagManager gtmId="AW-17086610736" />
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} disableTransitionOnChange>
           <WalletContextProvider>
             <div className="relative flex min-h-screen flex-col">
