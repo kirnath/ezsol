@@ -8,9 +8,6 @@ import GraduatedTokens from "./graduated-tokens";
 
 export default function Home() {
   return (
-    <>
-      <GoogleAnalytics gaId="AW-17086610736" />
-
       <div className="flex flex-col min-h-screen">
         {/* Hero Section */}
         <section className="pt-32 pb-20 relative">
@@ -228,6 +225,5 @@ export default function Home() {
           </div>
         </section>
       </div>
-    </>
   );
 }

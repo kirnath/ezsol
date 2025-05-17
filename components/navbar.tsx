@@ -6,6 +6,7 @@ import { Menu, X, Droplets } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { usePathname } from "next/navigation"
 import WalletButton from "@/components/wallet-button"
+import { GoogleAnalytics } from "@next/third-parties/google"
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false)
@@ -39,6 +40,7 @@ const Navbar = () => {
         scrolled ? "glass-effect py-2" : "bg-transparent py-4",
       )}
     >
+      <GoogleAnalytics gaId="AW-17086610736" />
       <div className="container flex items-center justify-between">
         <a href="/" className="flex items-center gap-4">
           <span className="text-xl font-bold gradient-text">EZSOL</span>

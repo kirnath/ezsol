@@ -271,8 +271,6 @@ export default function CreatePage() {
 
   if (!connected) {
     return (
-      <>
-        <GoogleAnalytics gaId="AW-17086610736" />
         <div className="container py-32">
           <div className="mx-auto max-w-5xl">
             <div className="text-center mb-10">
@@ -305,7 +303,6 @@ export default function CreatePage() {
             </Card>
           </div>
         </div>
-      </>
     );
   }
 
