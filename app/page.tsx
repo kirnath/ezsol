@@ -19,9 +19,9 @@ export default function Home() {
           <div className="flex flex-col items-center text-center max-w-3xl mx-auto space-y-8">
             <div className="inline-flex items-center rounded-full border px-4 py-1.5 text-sm font-medium mb-4">
               <span className="text-xs text-muted-foreground">
-                Launching Soon
+                Beta
               </span>
-              <span className="ml-2 h-1.5 w-1.5 rounded-full bg-primary" />
+              <span className="ml-2 h-1.5 w-1.5 rounded-full bg-yellow-500" />
             </div>
             <h1 className="text-4xl md:text-6xl font-bold tracking-tight gradient-text animate-gradient-x">
               Create Solana Tokens Without Code
