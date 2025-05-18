@@ -65,7 +65,7 @@ export function WalletContextProvider({ children }: WalletContextProviderProps) 
 
   const HELIUS_RPC = `https://mainnet.helius-rpc.com/?api-key=` + process.env.NEXT_PUBLIC_HELIUS_API_KEY
   // Get the endpoint based on the selected network
-  const endpoint = network === "mainnet-beta" ? HELIUS_RPC : clusterApiUrl(network as WalletAdapterNetwork)
+  const endpoint = network === "mainnet" ? HELIUS_RPC : clusterApiUrl(network as WalletAdapterNetwork)
 
   // Initialize wallet adapters
   const wallets = [
