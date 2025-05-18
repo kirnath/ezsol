@@ -12,7 +12,7 @@ const Footer = () => {
               Create your own Solana tokens without writing a single line of code.
             </p>
             <div className="flex space-x-4">
-              <Link href="https://twitter.com" className="text-muted-foreground hover:text-primary">
+              <Link href="https://twitter.com/ezsol_xyz" className="text-muted-foreground hover:text-primary">
                 <Twitter size={20} />
                 <span className="sr-only">Twitter</span>
               </Link>

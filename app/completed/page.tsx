@@ -8,6 +8,7 @@ import { getTokenCompletionById } from "@/lib/token-completion-service"
 import { Share2, Copy, ExternalLink } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { useToastNotification } from "@/components/toast-notification"
+import Script from "next/script"
 
 export default function CompletedPage() {
   const router = useRouter()
@@ -75,6 +76,15 @@ export default function CompletedPage() {
 
   if (loading) {
     return (
+      <>
+      <Script id="google-ads" strategy="afterInteractive">
+        {`
+          gtag('event', 'conversion', {
+              'send_to': 'AW-17086610736/x9JCCIOBu8kaELD6w9M_',
+              'transaction_id': ''
+          });
+        `}
+      </Script>
       <div className="container py-32">
         <div className="mx-auto max-w-2xl">
           <div className="text-center mb-10">
@@ -100,6 +110,7 @@ export default function CompletedPage() {
           </Card>
         </div>
       </div>
+      </>
     )
   }
 
@@ -182,5 +193,6 @@ export default function CompletedPage() {
         </div>
       </div>
     </div>
+    
   )
 }
