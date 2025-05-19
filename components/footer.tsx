@@ -31,14 +31,14 @@ const Footer = () => {
             <h3 className="mb-3 text-sm font-semibold">Resource</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link href="/blog" className="text-muted-foreground hover:text-foreground">
+                <a href="/blog" className="text-muted-foreground hover:text-foreground">
                   Blog
-                </Link>
+                </a>
               </li>
               <li>
-                <Link href="/terms" className="text-muted-foreground hover:text-foreground">
+                <a href="/terms" className="text-muted-foreground hover:text-foreground">
                   Terms of Service
-                </Link>
+                </a>
               </li>
             </ul>
           </div>
