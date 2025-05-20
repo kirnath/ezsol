@@ -16,7 +16,7 @@ interface TokenDetails {
     priceNative: string;
     priceUsd: string;
     symbol: string;
-    priceChange24h: number; // <-- add this line
+    priceChange24h: number;
 }
 
 function formatNumber(numStr: string) {
@@ -31,9 +31,9 @@ function formatNumber(numStr: string) {
 function formatPrice(numStr: string) {
     const num = parseFloat(numStr);
     if (isNaN(num)) return "0";
-    if (num >= 1) return num.toFixed(2); // e.g. $1.23
-    if (num >= 0.01) return num.toFixed(4); // e.g. $0.0123
-    return num.toFixed(6); // e.g. $0.000311
+    if (num >= 1) return num.toFixed(2);
+    if (num >= 0.01) return num.toFixed(4);
+    return num.toFixed(6);
 }
 
 export default function GraduatedTokens() {
@@ -54,7 +54,7 @@ export default function GraduatedTokens() {
                       priceNative: "",
                       priceUsd: token.usdPrice?.toString() ?? "0",
                       symbol: token.symbol,
-                      priceChange24h: token.pricePercentChange?.["24h"] ?? 0, // <-- add this line
+                      priceChange24h: token.pricePercentChange?.["24h"] ?? 0,
                   }))
                 : [];
             setGraduatedTokens(tokens);
@@ -83,7 +83,7 @@ export default function GraduatedTokens() {
                             liquidity={`$${formatNumber(token.liquidity)}`}
                             image={token.logo || "/placeholder.svg?height=80&width=80"}
                             tokenAddress={token.tokenAddress}
-                            priceChange24h={token.priceChange24h} // <-- add this prop
+                            priceChange24h={token.priceChange24h}
                         />
                     ))}
                 </div>

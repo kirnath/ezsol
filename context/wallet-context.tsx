@@ -62,10 +62,10 @@ interface WalletContextProviderProps {
 export function WalletContextProvider({ children }: WalletContextProviderProps) {
   // Get network from env, default to 'devnet' if not set
   const network = (process.env.NEXT_PUBLIC_NETWORK as NetworkType) || "devnet"
-
+ 
   const HELIUS_RPC = `https://mainnet.helius-rpc.com/?api-key=` + process.env.NEXT_PUBLIC_HELIUS_API_KEY
   // Get the endpoint based on the selected network
-  const endpoint = network === "mainnet" ? HELIUS_RPC : clusterApiUrl(network as WalletAdapterNetwork)
+  const endpoint = network === "mainnet-beta" ? HELIUS_RPC : clusterApiUrl(network as WalletAdapterNetwork)
 
   // Initialize wallet adapters
   const wallets = [

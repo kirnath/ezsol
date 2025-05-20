@@ -96,7 +96,6 @@ export default function CreatePage() {
 
   useEffect(() => {
     if (createdToken && tokenCompletionId) {
-      // Redirect to the completed page with the token ID
       router.push(`/completed?id=${tokenCompletionId}`);
     }
   }, [createdToken, tokenCompletionId, router]);

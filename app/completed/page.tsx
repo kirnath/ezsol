@@ -17,14 +17,12 @@ export default function CompletedPage() {
   const [tokenData, setTokenData] = useState<any>(null)
   const [loading, setLoading] = useState(true)
 
-  // Get token ID from URL params
   const tokenId = searchParams.get("id")
 
   useEffect(() => {
     async function fetchTokenData() {
       setLoading(true)
 
-      // If we have a token ID in the URL, try to fetch from Supabase
       if (tokenId) {
         const tokenData = await getTokenCompletionById(tokenId)
         if (tokenData) {
@@ -34,7 +32,6 @@ export default function CompletedPage() {
         }
       }
 
-      // Fallback to localStorage if no token ID or Supabase fetch failed
       const storedToken = localStorage.getItem("createdToken")
       if (storedToken) {
         try {

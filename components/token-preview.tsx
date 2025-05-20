@@ -14,7 +14,6 @@ interface TokenPreviewProps {
 }
 
 export default function TokenPreview({ tokenData }: TokenPreviewProps) {
-  // Use provided token data or fallback to defaults
   const previewData = {
     name: tokenData?.name || "My Awesome Token",
     symbol: tokenData?.symbol || "MAT",
@@ -31,7 +30,6 @@ export default function TokenPreview({ tokenData }: TokenPreviewProps) {
         <div className="bg-gradient-to-r from-purple-500 via-blue-500 to-cyan-400 h-24 flex items-center justify-center">
           <div className="h-16 w-16 rounded-full bg-white flex items-center justify-center">
             {previewData.logo ? (
-              // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={previewData.logo || "/placeholder.svg"}
                 alt={previewData.name}
@@ -65,21 +63,22 @@ export default function TokenPreview({ tokenData }: TokenPreviewProps) {
       <div className="space-y-2">
         <h3 className="text-sm font-medium">Token Contract Preview</h3>
         <div className="text-xs font-mono overflow-x-auto">
-          <CodeBlock language="rust">{`@program_id = "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
-
-@instruction
-def initialize_mint(
-    mint_authority: Pubkey,
-    freeze_authority: Pubkey | None,
-    decimals: u8,
-    mint: Mint,
-):
-    // Initialize a new SPL token
-    mint.mint_authority = mint_authority
-    mint.freeze_authority = freeze_authority
-    mint.decimals = ${previewData.decimals}
-    mint.is_initialized = True
-    mint.supply = 0`}</CodeBlock>
+          <CodeBlock language="rust">
+            {`@program_id = "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+              @instruction
+              def initialize_mint(
+                  mint_authority: Pubkey,
+                  freeze_authority: Pubkey | None,
+                  decimals: u8,
+                  mint: Mint,
+              ):
+                  // Initialize a new SPL token
+                  mint.mint_authority = mint_authority
+                  mint.freeze_authority = freeze_authority
+                  mint.decimals = ${previewData.decimals}
+                  mint.is_initialized = True
+                  mint.supply = 0`}
+          </CodeBlock>
         </div>
       </div>
     </div>
