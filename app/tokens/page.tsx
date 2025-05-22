@@ -8,145 +8,74 @@ import { Button } from "@/components/ui/button"
 import { Search, ArrowUpDown, ExternalLink } from "lucide-react"
 import Image from "next/image"
 import { useWallet } from "@/context/wallet-context"
+import { io } from "socket.io-client"
+import fetchTokenOverview from "@/lib/fetch-token-data"
 
 interface TokenListingProps {
-  name: string
-  symbol: string
-  logo?: string
-  created: string
+  tokenMint: string
+  tokenName: string
+  tokenSymbol: string
+  tokenDescription: string
+  tokenImage?: string
+  tokenWebsite?: string
+  tokenTwitter?: string
+  tokenTelegram?: string
   liquidity: string
   marketCap: string
-  swaps: number
+  holders: number
   volume: string
   price: string
-  priceChange: number
-  address: string
 }
 
-// Mock data for demonstration
-const mockTokens: TokenListingProps[] = [
-  {
-    name: "Solana Meme",
-    symbol: "MEME",
-    logo: "/placeholder.svg?height=40&width=40",
-    created: "12s",
-    liquidity: "$10K",
-    marketCap: "$0",
-    swaps: 0,
-    volume: "$0",
-    price: "$0.00482",
-    priceChange: 0,
-    address: "abc123",
-  },
-  {
-    name: "SueSin Horny",
-    symbol: "HORNY",
-    logo: "/placeholder.svg?height=40&width=40",
-    created: "16s",
-    liquidity: "$10K",
-    marketCap: "$5K",
-    swaps: 0,
-    volume: "$0",
-    price: "$0.04895",
-    priceChange: 0,
-    address: "def456",
-  },
-  {
-    name: "JMB IN MY WALLET",
-    symbol: "JMB",
-    logo: "/placeholder.svg?height=40&width=40",
-    created: "21s",
-    liquidity: "$11K",
-    marketCap: "$5K",
-    swaps: 0,
-    volume: "$0",
-    price: "$0.04746",
-    priceChange: 0,
-    address: "ghi789",
-  },
-  {
-    name: "CON Concurrency",
-    symbol: "CON",
-    logo: "/placeholder.svg?height=40&width=40",
-    created: "28s",
-    liquidity: "$11K",
-    marketCap: "$0",
-    swaps: 2,
-    volume: "$69",
-    price: "$0.04979",
-    priceChange: 0,
-    address: "jkl012",
-  },
-  {
-    name: "LIESOCIAL NO TRUST",
-    symbol: "LIE",
-    logo: "/placeholder.svg?height=40&width=40",
-    created: "28s",
-    liquidity: "$11K",
-    marketCap: "$5K",
-    swaps: 3,
-    volume: "$702",
-    price: "$0.04963",
-    priceChange: 0,
-    address: "mno345",
-  },
-  {
-    name: "Badge the coolest",
-    symbol: "BADGE",
-    logo: "/placeholder.svg?height=40&width=40",
-    created: "30s",
-    liquidity: "$13K",
-    marketCap: "$7K",
-    swaps: 1,
-    volume: "$58",
-    price: "$0.07037",
-    priceChange: 0,
-    address: "pqr678",
-  },
-  {
-    name: "5FCADE",
-    symbol: "5FC",
-    logo: "/placeholder.svg?height=40&width=40",
-    created: "31s",
-    liquidity: "$11K",
-    marketCap: "$0",
-    swaps: 2,
-    volume: "$104",
-    price: "$0.05196",
-    priceChange: 0,
-    address: "stu901",
-  },
-]
+const socket = io("http://localhost:4000")
+
+function formatMarketCap(value: string | number) {
+  const num = Number(value)
+  if (num >= 1e9) return (num / 1e9).toFixed(2) + "B"
+  if (num >= 1e6) return (num / 1e6).toFixed(2) + "M"
+  if (num >= 1e3) return (num / 1e3).toFixed(2) + "K"
+  return num.toFixed(2)
+}
+
+function formatPrice(value: string | number) {
+  const num = Number(value)
+  if (num < 0.01) return num.toExponential(2)
+  return num.toFixed(6)
+}
 
 export default function TokensPage() {
   const [searchTerm, setSearchTerm] = useState("")
-  const [tokens, setTokens] = useState<TokenListingProps[]>(mockTokens)
+  const [tokens, setTokens] = useState<TokenListingProps[]>([])
   const { connection, publicKey, network } = useWallet()
+  const [, forceUpdate] = useState(0)
 
-  // Filter tokens based on search term
-  const filteredTokens = tokens.filter(
-    (token) =>
-      token.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      token.symbol.toLowerCase().includes(searchTerm.toLowerCase()),
-  )
-
-  // In a real implementation, you would fetch real token data here
   useEffect(() => {
-    const loadTokens = async () => {
-      if (connection && publicKey) {
-        try {
-          // This would be replaced with actual API calls to get new tokens
-          // For now, we're using mock data
-          // const createdTokens = await fetchCreatedTokens(connection, publicKey.toString(), network)
-          // Map the tokens to the format needed for display
-        } catch (error) {
-          console.error("Error loading tokens:", error)
-        }
-      }
-    }
+    const interval = setInterval(() => {
+      forceUpdate((n) => n + 1)
+    }, 1000)
+    return () => clearInterval(interval)
+  }, [])
 
-    loadTokens()
-  }, [connection, publicKey, network])
+  useEffect(() => {
+    function handleNewToken(token: TokenListingProps) {
+      const processToken = async () => {
+        const tokenData = await fetchTokenOverview(token.tokenMint)
+        const withTokenData = {
+          ...token,
+          created: Date.now(),
+          liquidity: tokenData.liquidity,
+          marketCap: tokenData.marketCap,
+          holders: tokenData.holder,
+          volume: tokenData.volume,
+          price: tokenData.price
+        }
+        setTokens((prev) => [withTokenData, ...prev].slice(0, 20))
+      }
+      processToken()
+    }
+    socket.on("new_token", handleNewToken)
+    return () => socket.off("new_token", handleNewToken)
+  }, [])
 
   return (
     <div className="container mx-auto px-4 py-24">
@@ -216,7 +145,7 @@ export default function TokensPage() {
                         </th>
                         <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
                           <div className="flex items-center space-x-1">
-                            <span>Swaps</span>
+                            <span>Holders</span>
                             <ArrowUpDown className="h-3 w-3" />
                           </div>
                         </th>
@@ -232,7 +161,7 @@ export default function TokensPage() {
                       </tr>
                     </thead>
                     <tbody className="[&_tr:last-child]:border-0">
-                      {filteredTokens.map((token, index) => (
+                      {tokens?.map((token, index) => (
                         <tr
                           key={index}
                           className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
@@ -241,30 +170,39 @@ export default function TokensPage() {
                             <div className="flex items-center gap-3">
                               <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden">
                                 <Image
-                                  src={token.logo || "/placeholder.svg?height=40&width=40"}
-                                  alt={token.name}
+                                  src={token.tokenImage || "/placeholder.svg?height=40&width=40"}
+                                  alt={token.tokenName}
                                   width={40}
                                   height={40}
                                   className="object-cover"
                                 />
                               </div>
                               <div>
-                                <div className="font-medium">{token.name}</div>
-                                <div className="text-xs text-muted-foreground">{token.symbol}</div>
+                                <div className="font-medium">{token.tokenName}</div>
+                                <div className="text-xs text-muted-foreground">{token.tokenSymbol}</div>
                               </div>
                             </div>
                           </td>
                           <td className="p-4 align-middle">
-                            <div className="text-red-500">{token.created}</div>
+                            <div className="text-red-500">
+                              {(() => {
+                                const seconds = Math.floor((Date.now() - (token as any).created) / 1000)
+                                if (seconds >= 60) {
+                                  const minutes = Math.floor(seconds / 60)
+                                  return `${minutes}m`
+                                }
+                                return `${seconds}s`
+                              })()}
+                            </div>
                           </td>
                           <td className="p-4 align-middle">
-                            <div>{token.liquidity}</div>
+                            <div>{formatMarketCap(token.liquidity)}</div>
                           </td>
                           <td className="p-4 align-middle">
-                            <div>{token.marketCap}</div>
-                            <div className="text-xs text-muted-foreground">{token.price}</div>
+                            <div>{formatMarketCap(token.marketCap)}</div>
+                            <div className="text-xs text-muted-foreground">{formatPrice(token.price)}</div>
                           </td>
-                          <td className="p-4 align-middle">{token.swaps}</td>
+                          <td className="p-4 align-middle">{token.holders}</td>
                           <td className="p-4 align-middle">{token.volume}</td>
                           <td className="p-4 align-middle">
                             <div className="flex space-x-2">
@@ -272,10 +210,13 @@ export default function TokensPage() {
                                 <span className="mr-1">Buy</span>
                                 <span className="text-green-500">1 SOL </span>
                               </Button>
-                              <Button size="icon" variant="ghost" className="h-8 w-8">
-                                <ExternalLink className="h-4 w-4" />
-                                <span className="sr-only">View on Explorer</span>
-                              </Button>
+                              <a href={`https://pump.fun/${token.tokenMint}`} target="_blank" rel="noopener noreferrer">
+                                <Button size="icon" variant="ghost" className="h-8 w-8">
+                                  <ExternalLink className="h-4 w-4" />
+                                  <span className="sr-only">View on Pump.fun</span>
+                                </Button>
+                              </a>
+                              
                             </div>
                           </td>
                         </tr>

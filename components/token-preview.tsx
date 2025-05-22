@@ -65,19 +65,19 @@ export default function TokenPreview({ tokenData }: TokenPreviewProps) {
         <div className="text-xs font-mono overflow-x-auto">
           <CodeBlock language="rust">
             {`@program_id = "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
-              @instruction
-              def initialize_mint(
-                  mint_authority: Pubkey,
-                  freeze_authority: Pubkey | None,
-                  decimals: u8,
-                  mint: Mint,
-              ):
-                  // Initialize a new SPL token
-                  mint.mint_authority = mint_authority
-                  mint.freeze_authority = freeze_authority
-                  mint.decimals = ${previewData.decimals}
-                  mint.is_initialized = True
-                  mint.supply = 0`}
+@instruction
+def initialize_mint(
+    mint_authority: Pubkey,
+    freeze_authority: Pubkey | None,
+    decimals: u8,
+    mint: Mint,
+):
+    // Initialize a new SPL token
+    mint.mint_authority = mint_authority
+    mint.freeze_authority = freeze_authority
+    mint.decimals = ${previewData.decimals}
+    mint.is_initialized = True
+    mint.supply = 0`}
           </CodeBlock>
         </div>
       </div>
