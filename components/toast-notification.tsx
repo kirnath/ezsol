@@ -28,8 +28,7 @@ export function useToastNotification() {
       title,
       description,
       duration,
-      variant: type === "error" ? "destructive" : "default",
-      icon: icons[type],
+      variant: type === "error" ? "destructive" : "default"
     })
   }
 

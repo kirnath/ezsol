@@ -10,6 +10,7 @@ import Image from "next/image"
 import { useWallet } from "@/context/wallet-context"
 import { io } from "socket.io-client"
 import fetchTokenOverview from "@/lib/fetch-token-data"
+import { useToastNotification } from "@/components/toast-notification"
 
 interface TokenListingProps {
   tokenMint: string
@@ -27,7 +28,7 @@ interface TokenListingProps {
   price: string
 }
 
-const socket = io("http://localhost:4000")
+const socket = io(process.env.NEXT_PUBLIC_WSS_LOCAL || "http://localhost:4000")
 
 function formatMarketCap(value: string | number) {
   const num = Number(value)
@@ -47,6 +48,7 @@ export default function TokensPage() {
   const [searchTerm, setSearchTerm] = useState("")
   const [tokens, setTokens] = useState<TokenListingProps[]>([])
   const { connection, publicKey, network } = useWallet()
+  const toast = useToastNotification()
   const [, forceUpdate] = useState(0)
 
   useEffect(() => {
@@ -59,15 +61,23 @@ export default function TokensPage() {
   useEffect(() => {
     function handleNewToken(token: TokenListingProps) {
       const processToken = async () => {
+        if(!token.tokenMint) return
         const tokenData = await fetchTokenOverview(token.tokenMint)
+        console.log(tokenData)
         const withTokenData = {
           ...token,
           created: Date.now(),
           liquidity: tokenData.liquidity,
           marketCap: tokenData.marketCap,
           holders: tokenData.holder,
-          volume: tokenData.volume,
-          price: tokenData.price
+          volume: tokenData.v24hUSD,
+          price: tokenData.price,
+          tokenName: tokenData.name,
+          tokenSymbol: tokenData.symbol,
+          tokenImage: tokenData.logoURI,
+          tokenWebsite: tokenData.extensions?.website || undefined,
+          tokenTwitter: tokenData.extensions?.twitter || undefined,
+          tokenTelegram: tokenData.extensions?.telegram || undefined,
         }
         setTokens((prev) => [withTokenData, ...prev].slice(0, 20))
       }
@@ -161,66 +171,81 @@ export default function TokensPage() {
                       </tr>
                     </thead>
                     <tbody className="[&_tr:last-child]:border-0">
-                      {tokens?.map((token, index) => (
-                        <tr
-                          key={index}
-                          className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
-                        >
-                          <td className="p-4 align-middle">
-                            <div className="flex items-center gap-3">
-                              <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden">
-                                <Image
-                                  src={token.tokenImage || "/placeholder.svg?height=40&width=40"}
-                                  alt={token.tokenName}
-                                  width={40}
-                                  height={40}
-                                  className="object-cover"
-                                />
-                              </div>
-                              <div>
-                                <div className="font-medium">{token.tokenName}</div>
-                                <div className="text-xs text-muted-foreground">{token.tokenSymbol}</div>
-                              </div>
-                            </div>
-                          </td>
-                          <td className="p-4 align-middle">
-                            <div className="text-red-500">
-                              {(() => {
-                                const seconds = Math.floor((Date.now() - (token as any).created) / 1000)
-                                if (seconds >= 60) {
-                                  const minutes = Math.floor(seconds / 60)
-                                  return `${minutes}m`
-                                }
-                                return `${seconds}s`
-                              })()}
-                            </div>
-                          </td>
-                          <td className="p-4 align-middle">
-                            <div>{formatMarketCap(token.liquidity)}</div>
-                          </td>
-                          <td className="p-4 align-middle">
-                            <div>{formatMarketCap(token.marketCap)}</div>
-                            <div className="text-xs text-muted-foreground">{formatPrice(token.price)}</div>
-                          </td>
-                          <td className="p-4 align-middle">{token.holders}</td>
-                          <td className="p-4 align-middle">{token.volume}</td>
-                          <td className="p-4 align-middle">
-                            <div className="flex space-x-2">
-                              <Button size="sm" variant="outline" className="h-8 px-2 text-xs">
-                                <span className="mr-1">Buy</span>
-                                <span className="text-green-500">1 SOL </span>
-                              </Button>
-                              <a href={`https://pump.fun/${token.tokenMint}`} target="_blank" rel="noopener noreferrer">
-                                <Button size="icon" variant="ghost" className="h-8 w-8">
-                                  <ExternalLink className="h-4 w-4" />
-                                  <span className="sr-only">View on Pump.fun</span>
-                                </Button>
-                              </a>
-                              
-                            </div>
+                      {tokens.length === 0 ? (
+                        <tr>
+                          <td colSpan={7} className="p-8 text-center text-muted-foreground">
+                            Loading tokens...
                           </td>
                         </tr>
-                      ))}
+                      ) : (
+                        tokens?.map((token, index) => (
+                          <tr
+                            key={index}
+                            className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
+                          >
+                            <td className="p-4 align-middle">
+                              <div className="flex items-center gap-3">
+                                <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden">
+                                  <Image
+                                    src={token.tokenImage || "/placeholder.svg?height=40&width=40"}
+                                    alt={token.tokenName}
+                                    width={40}
+                                    height={40}
+                                    className="object-cover"
+                                  />
+                                </div>
+                                <div>
+                                  <div className="font-medium">{token.tokenName}</div>
+                                  <div className="text-xs text-muted-foreground">{token.tokenSymbol}</div>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="p-4 align-middle">
+                              <div className="text-red-500">
+                                {(() => {
+                                  const seconds = Math.floor((Date.now() - (token as any).created) / 1000)
+                                  if (seconds >= 60) {
+                                    const minutes = Math.floor(seconds / 60)
+                                    return `${minutes}m`
+                                  }
+                                  return `${seconds}s`
+                                })()}
+                              </div>
+                            </td>
+                            <td className="p-4 align-middle">
+                              <div>{formatMarketCap(token.liquidity)}</div>
+                            </td>
+                            <td className="p-4 align-middle">
+                              <div>{formatMarketCap(token.marketCap)}</div>
+                              <div className="text-xs text-muted-foreground">{formatPrice(token.price)}</div>
+                            </td>
+                            <td className="p-4 align-middle">{token.holders}</td>
+                            <td className="p-4 align-middle">{formatMarketCap(token.volume)}</td>
+                            <td className="p-4 align-middle">
+                              <div className="flex space-x-2">
+                                <Button size="sm" variant="outline" className="h-8 px-2 text-xs" onClick={() => {
+                                  console.log("Toast")
+                                  toast.success({
+                                    title: "Coming soon!",
+                                    description: "This feature is not available yet. Please check back later."
+                                  })
+
+                                }}>
+                                  <span className="mr-1">Quick Buy</span>
+                                  <span className="text-green-500">0.5 SOL </span>
+                                </Button>
+                                <a href={`https://pump.fun/${token.tokenMint}`} target="_blank" rel="noopener noreferrer">
+                                  <Button size="icon" variant="ghost" className="h-8 w-8">
+                                    <ExternalLink className="h-4 w-4" />
+                                    <span className="sr-only">View on Pump.fun</span>
+                                  </Button>
+                                </a>
+                                
+                              </div>
+                            </td>
+                          </tr>
+                        ))
+                      )}
                     </tbody>
                   </table>
                 </div>

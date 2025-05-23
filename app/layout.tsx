@@ -7,6 +7,7 @@ import { WalletContextProvider } from "@/context/wallet-context"
 import Navbar from "@/components/navbar"
 import Footer from "@/components/footer"
 import { GoogleTagManager } from "@next/third-parties/google"
+import { Toaster } from "@/components/ui/toaster"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -64,6 +65,7 @@ export default function RootLayout({
               <main className="flex-1">{children}</main>
               <Footer />
             </div>
+            <Toaster />
           </WalletContextProvider>
         </ThemeProvider>
       </body>
