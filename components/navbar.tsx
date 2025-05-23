@@ -29,7 +29,7 @@ const Navbar = () => {
     { name: "Home", href: "/" },
     { name: "Create Token", href: "/create" },
     { name: "Dashboard", href: "/dashboard" },
-    { name: "Liquidity", href: "/liquidity", icon: <Droplets className="h-4 w-4 mr-1" /> },
+    { name: "Liquidity", href: "/liquidity"},
     { name: "Tokens", href: "/tokens", icon: <ChartSpline className="h-4 w-4 mr-1" /> },
   ]
 
