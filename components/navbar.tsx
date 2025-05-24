@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import { Menu, X, Droplets, ChartSpline } from "lucide-react"
+import { Menu, X, Droplets } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { usePathname } from "next/navigation"
 import WalletButton from "@/components/wallet-button"
@@ -30,7 +30,7 @@ const Navbar = () => {
     { name: "Create Token", href: "/create" },
     { name: "Dashboard", href: "/dashboard" },
     { name: "Liquidity", href: "/liquidity"},
-    { name: "Tokens", href: "/tokens", icon: <ChartSpline className="h-4 w-4 mr-1" /> },
+    { name: "Tokens", href: "/tokens"},
   ]
 
   return (

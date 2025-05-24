@@ -11,6 +11,16 @@ body {
     text-wrap: balance;
   }
 }
+sup {
+  font-size: 60%;
+  vertical-align: super;
+  line-height: 0;
+}
+.price-sup {
+  font-size: 60%;
+  vertical-align: super;
+  line-height: 0;
+}
 
 @layer base {
   :root {

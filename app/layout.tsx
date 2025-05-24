@@ -8,6 +8,7 @@ import Navbar from "@/components/navbar"
 import Footer from "@/components/footer"
 import { GoogleTagManager } from "@next/third-parties/google"
 import { Toaster } from "@/components/ui/toaster"
+import ParticlesBackground from "@/components/particles-background"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -58,6 +59,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.className} min-h-screen bg-gradient-to-b from-background to-background/80 antialiased`}>
       <GoogleTagManager gtmId="AW-17086610736" />
+      <ParticlesBackground />
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} disableTransitionOnChange>
           <WalletContextProvider>
             <div className="relative flex min-h-screen flex-col">
