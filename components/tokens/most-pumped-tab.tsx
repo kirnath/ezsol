@@ -5,10 +5,12 @@ import type React from "react"
 import { useState, useEffect } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { ArrowUpDown, ChevronUp, Flame, TrendingUp, Crown, Coins, ChevronsUp } from "lucide-react"
+import { ArrowUpDown, ChevronUp, Flame, TrendingUp, Crown, ChevronsUp } from "lucide-react"
 import Image from "next/image"
 import { useToastNotification } from "@/components/toast-notification"
 import { supabase } from "@/lib/supabase-client"
+import { SubmitTokenDialog } from "./submit-token-dialog"
+import { BuyPumpsDialog } from "./buy-pumps-dialog"
 
 interface PumpedToken {
   id: string
@@ -79,6 +81,17 @@ export default function MostPumpedTab({ searchTerm }: MostPumpedTabProps) {
   const [isLoading, setIsLoading] = useState(true)
   const [currentUserWallet, setCurrentUserWallet] = useState<string>("")
   const toast = useToastNotification()
+  const [buyPumpsDialog, setBuyPumpsDialog] = useState<{
+    open: boolean
+    tokenId: string
+    tokenName: string
+    tokenSymbol: string
+  }>({
+    open: false,
+    tokenId: "",
+    tokenName: "",
+    tokenSymbol: "",
+  })
 
   // Mock user wallet for demo - replace with actual wallet connection
   useEffect(() => {
@@ -262,54 +275,13 @@ export default function MostPumpedTab({ searchTerm }: MostPumpedTabProps) {
     }
   }
 
-  const handlePaidPump = async (tokenId: string, event: React.MouseEvent) => {
-    if (!currentUserWallet) {
-      toast.error({
-        title: "Wallet not connected",
-        description: "Please connect your wallet to pump tokens",
-      })
-      return
-    }
-
-    try {
-      createFloatingNumber(tokenId, event)
-
-      // This would integrate with Solana wallet for payment
-      // For now, we'll simulate a successful payment
-      const mockTxSignature = `tx_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-
-      const { data, error } = await supabase.rpc("record_pump", {
-        p_token_id: tokenId,
-        p_user_wallet: currentUserWallet,
-        p_pump_type: "paid",
-        p_sol_amount: 0.02,
-        p_transaction_signature: mockTxSignature,
-      })
-
-      if (error) {
-        console.error("Error recording paid pump:", error)
-        toast.error({
-          title: "Paid pump failed",
-          description: error.message,
-        })
-        return
-      }
-
-      // Refresh data
-      await fetchPumpedTokens()
-      await fetchUserPumpStatus()
-
-      toast.success({
-        title: "Paid pump successful! 💎",
-        description: "Thank you for your 0.02 SOL contribution!",
-      })
-    } catch (error) {
-      console.error("Error in handlePaidPump:", error)
-      toast.error({
-        title: "Error",
-        description: "Failed to process paid pump",
-      })
-    }
+  const handlePaidPump = (tokenId: string, tokenName: string, tokenSymbol: string) => {
+    setBuyPumpsDialog({
+      open: true,
+      tokenId,
+      tokenName,
+      tokenSymbol,
+    })
   }
 
   const getUserPumpStatus = (tokenId: string) => {
@@ -324,13 +296,21 @@ export default function MostPumpedTab({ searchTerm }: MostPumpedTabProps) {
     )
     .sort((a, b) => b.weighted_score - a.weighted_score)
 
+  const handleTokenSubmitted = () => {
+    fetchPumpedTokens()
+  }
+
+  const handlePumpsPurchased = () => {
+    fetchPumpedTokens()
+    fetchUserPumpStatus()
+  }
+
   if (isLoading) {
     return (
       <Card>
         <CardContent className="p-8">
           <div className="flex items-center justify-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-violet-400"></div>
-            <span className="ml-2 text-muted-foreground">Loading pumped tokens...</span>
+          <span className="loader"></span>            
           </div>
         </CardContent>
       </Card>
@@ -340,6 +320,15 @@ export default function MostPumpedTab({ searchTerm }: MostPumpedTabProps) {
   return (
     <Card>
       <CardContent className="p-0">
+        <div className="p-4 border-b bg-muted/20">
+          <div className="flex justify-between items-center">
+            <div>
+              <h3 className="font-semibold">Most Pumped Tokens</h3>
+              <p className="text-sm text-muted-foreground">Community favorites ranked by upvotes</p>
+            </div>
+            <SubmitTokenDialog onTokenSubmitted={handleTokenSubmitted} />
+          </div>
+        </div>
         <div className="rounded-md border">
           <div className="relative w-full overflow-auto">
             <table className="w-full caption-bottom text-sm">
@@ -411,13 +400,9 @@ export default function MostPumpedTab({ searchTerm }: MostPumpedTabProps) {
                       >
                         <td className="p-1 align-middle">
                           <div className="relative flex items-center justify-center">
-                            {isTopThree && (
-                              <Crown className="absolute -top-2 -right-2 h-4 w-4 text-yellow-400" />
-                            )}
-                            <div
-                              className={`flex items-center justify-center w-8 h-8hover:scale-110`}
-                            >
-                              { isTopThree ? "#" + (index + 1) : index + 1}
+                            {isTopThree && <Crown className="absolute -top-2 -right-2 h-4 w-4 text-yellow-400" />}
+                            <div className={`flex items-center justify-center w-8 h-8hover:scale-110`}>
+                              {isTopThree ? "#" + (index + 1) : index + 1}
                             </div>
                           </div>
                         </td>
@@ -497,7 +482,7 @@ export default function MostPumpedTab({ searchTerm }: MostPumpedTabProps) {
                                   size="sm"
                                   variant="outline"
                                   className="h-8 px-3 text-xs font-medium border-orange-500/30 text-orange-400 hover:bg-orange-500 hover:text-white transition-all duration-300"
-                                  onClick={(e) => handlePaidPump(token.id, e)}
+                                  onClick={() => handlePaidPump(token.id, token.name, token.symbol)}
                                 >
                                   <ChevronsUp className="h-3 w-3 mr-1" />
                                   Buy Pumps
@@ -530,6 +515,15 @@ export default function MostPumpedTab({ searchTerm }: MostPumpedTabProps) {
             </table>
           </div>
         </div>
+        <BuyPumpsDialog
+          open={buyPumpsDialog.open}
+          onOpenChange={(open) => setBuyPumpsDialog((prev) => ({ ...prev, open }))}
+          tokenId={buyPumpsDialog.tokenId}
+          tokenName={buyPumpsDialog.tokenName}
+          tokenSymbol={buyPumpsDialog.tokenSymbol}
+          userWallet={currentUserWallet}
+          onPumpsPurchased={handlePumpsPurchased}
+        />
       </CardContent>
 
       <style jsx>{`
