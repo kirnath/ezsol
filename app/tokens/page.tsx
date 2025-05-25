@@ -60,7 +60,6 @@ export default function TokensPage() {
   const [searchTerm, setSearchTerm] = useState("")
   const [tokens, setTokens] = useState<TokenListingProps[]>([])
   const [trendingTokens, setTrendingTokens] = useState([])
-  const { connection, publicKey, network } = useWallet()
   const toast = useToastNotification()
   const [, forceUpdate] = useState(0)
   const [animatedTokens, setAnimatedTokens] = useState<Set<string>>(new Set())
@@ -116,7 +115,6 @@ export default function TokensPage() {
     const getTrendingTokens = async () => {
       const trendingTokens = await fetchTrendingTokens()
       setTrendingTokens(trendingTokens)
-      console.log(trendingTokens)
     }
     getTrendingTokens()
   }, [])
@@ -275,7 +273,7 @@ export default function TokensPage() {
                             </td>
                             <td className="p-4 align-middle overflow-hidden">
                               <div className={animatedTokens.has(token.tokenMint) ? "animate-shake-content" : ""}>
-                                {formatMarketCap(token.volume)}
+                                ${formatMarketCap(token.volume)}
                               </div>
                             </td>
                             <td className="p-4 align-middle overflow-hidden">
@@ -434,7 +432,7 @@ export default function TokensPage() {
                                 <Button
                                   size="sm"
                                   variant="outline"
-                                  className="h-8 px-2 text-xs"
+                                  className="h-8 px-2 text-xs gradient-border rounded-md"
                                   onClick={() => {
                                     toast.success({
                                       title: "Coming soon!",
@@ -442,8 +440,7 @@ export default function TokensPage() {
                                     })
                                   }}
                                 >
-                                  <span className="mr-1">Quick Buy</span>
-                                  <span className="text-green-500">0.5 SOL </span>
+                                  <span className="mr-1 ">Quick Copy</span>
                                 </Button>
                                 <a
                                   href={`https://dexscreener.com/solana/${token.address}`}
