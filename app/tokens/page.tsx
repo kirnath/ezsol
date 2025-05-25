@@ -1,81 +1,94 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { Search, ArrowUpDown, ExternalLink } from "lucide-react"
-import Image from "next/image"
-import { useWallet } from "@/context/wallet-context"
-import { io } from "socket.io-client"
-import fetchTokenOverview from "@/lib/fetch-token-data"
-import { useToastNotification } from "@/components/toast-notification"
-import { fetchTrendingTokens } from "@/lib/birdeye-utils"
+import { useState, useEffect } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import {
+  Search,
+  ArrowUpDown,
+  ExternalLink,
+  Clock,
+  TrendingUp,
+  Rocket,
+} from "lucide-react";
+import Image from "next/image";
+import { useWallet } from "@/context/wallet-context";
+import { io } from "socket.io-client";
+import fetchTokenOverview from "@/lib/fetch-token-data";
+import { useToastNotification } from "@/components/toast-notification";
+import { fetchTrendingTokens } from "@/lib/birdeye-utils";
 
 interface TokenListingProps {
-  tokenMint: string
-  tokenName: string
-  tokenSymbol: string
-  tokenDescription: string
-  tokenImage?: string
-  tokenWebsite?: string
-  tokenTwitter?: string
-  tokenTelegram?: string
-  liquidity: string
-  marketCap: string
-  holders: number
-  volume: string
-  price: string
+  tokenMint: string;
+  tokenName: string;
+  tokenSymbol: string;
+  tokenDescription: string;
+  tokenImage?: string;
+  tokenWebsite?: string;
+  tokenTwitter?: string;
+  tokenTelegram?: string;
+  liquidity: string;
+  marketCap: string;
+  holders: number;
+  volume: string;
+  price: string;
 }
 
 interface TrendingToken24H {
-  tokenMint: string
-  tokenName: string
-  tokenSymbol: string
-  tokenImage: string
-  tokenMarketCap: string
-  tokenPrice: string
-  tokenPriceChange24h: string
-  tokenVolume24h: string
+  tokenMint: string;
+  tokenName: string;
+  tokenSymbol: string;
+  tokenImage: string;
+  tokenMarketCap: string;
+  tokenPrice: string;
+  tokenPriceChange24h: string;
+  tokenVolume24h: string;
 }
 
-const socket = io(process.env.NEXT_PUBLIC_WSS_LOCAL || "http://localhost:4000")
+const socket = io(process.env.NEXT_PUBLIC_WSS_LOCAL || "http://localhost:4000");
 
 function formatMarketCap(value: string | number) {
-  const num = Number(value)
-  if (num >= 1e9) return (num / 1e9).toFixed(2) + "B"
-  if (num >= 1e6) return (num / 1e6).toFixed(2) + "M"
-  if (num >= 1e3) return (num / 1e3).toFixed(2) + "K"
-  return num.toFixed(2)
+  const num = Number(value);
+  if (num >= 1e9) return (num / 1e9).toFixed(2) + "B";
+  if (num >= 1e6) return (num / 1e6).toFixed(2) + "M";
+  if (num >= 1e3) return (num / 1e3).toFixed(2) + "K";
+  return num.toFixed(2);
 }
 
 function formatPrice(value: string | number) {
-  const num = Number(value)
-  if (num < 0.01) return num.toExponential(2)
-  return num.toFixed(6)
+  const num = Number(value);
+  if (num < 0.01) return num.toExponential(2);
+  return num.toFixed(6);
 }
 
 export default function TokensPage() {
-  const [searchTerm, setSearchTerm] = useState("")
-  const [tokens, setTokens] = useState<TokenListingProps[]>([])
-  const [trendingTokens, setTrendingTokens] = useState([])
-  const toast = useToastNotification()
-  const [, forceUpdate] = useState(0)
-  const [animatedTokens, setAnimatedTokens] = useState<Set<string>>(new Set())
+  const [searchTerm, setSearchTerm] = useState("");
+  const [tokens, setTokens] = useState<TokenListingProps[]>([]);
+  const [trendingTokens, setTrendingTokens] = useState([]);
+  const toast = useToastNotification();
+  const [, forceUpdate] = useState(0);
+  const [animatedTokens, setAnimatedTokens] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     const interval = setInterval(() => {
-      forceUpdate((n) => n + 1)
-    }, 1000)
-    return () => clearInterval(interval)
-  }, [])
+      forceUpdate((n) => n + 1);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     function handleNewToken(token: TokenListingProps) {
       const processToken = async () => {
-        if (!token.tokenMint) return
-        const tokenData = await fetchTokenOverview(token.tokenMint)
+        if (!token.tokenMint) return;
+        const tokenData = await fetchTokenOverview(token.tokenMint);
         const withTokenData = {
           ...token,
           created: Date.now(),
@@ -90,40 +103,42 @@ export default function TokensPage() {
           tokenWebsite: tokenData.extensions?.website || undefined,
           tokenTwitter: tokenData.extensions?.twitter || undefined,
           tokenTelegram: tokenData.extensions?.telegram || undefined,
-        }
-        setTokens((prev) => [withTokenData, ...prev].slice(0, 20))
+        };
+        setTokens((prev) => [withTokenData, ...prev].slice(0, 20));
 
         // Add shake animation for new token
-        setAnimatedTokens((prev) => new Set(prev).add(token.tokenMint))
+        setAnimatedTokens((prev) => new Set(prev).add(token.tokenMint));
 
         // Remove animation after 2 seconds
         setTimeout(() => {
           setAnimatedTokens((prev) => {
-            const newSet = new Set(prev)
-            newSet.delete(token.tokenMint)
-            return newSet
-          })
-        }, 800)
-      }
-      processToken()
+            const newSet = new Set(prev);
+            newSet.delete(token.tokenMint);
+            return newSet;
+          });
+        }, 800);
+      };
+      processToken();
     }
-    socket.on("new_token", handleNewToken)
-    return () => socket.off("new_token", handleNewToken)
-  }, [])
+    socket.on("new_token", handleNewToken);
+    return () => socket.off("new_token", handleNewToken);
+  }, []);
 
   useEffect(() => {
     const getTrendingTokens = async () => {
-      const trendingTokens = await fetchTrendingTokens()
-      setTrendingTokens(trendingTokens)
-    }
-    getTrendingTokens()
-  }, [])
+      const trendingTokens = await fetchTrendingTokens();
+      setTrendingTokens(trendingTokens);
+    };
+    getTrendingTokens();
+  }, []);
 
   return (
     <div className="container mx-auto px-4 py-24">
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">New Tokens</h1>
-        <p className="text-muted-foreground">Find the latest tokens across Solana network</p>
+        <p className="text-muted-foreground">
+          Find the latest tokens across Solana network
+        </p>
       </div>
 
       <div className="mb-6 flex flex-col sm:flex-row gap-4">
@@ -147,12 +162,31 @@ export default function TokensPage() {
       </div>
 
       <Tabs defaultValue="all" className="w-full">
-        <TabsList className="mb-4">
-          <TabsTrigger value="all">All Tokens</TabsTrigger>
-
-          <TabsTrigger value="trending">Trending</TabsTrigger>
-          <TabsTrigger value="verified">Verified</TabsTrigger>
-        </TabsList>
+        <div className="mb-8">
+          <TabsList className="grid w-full grid-cols-3 lg:w-auto lg:grid-cols-3 h-12 p-1 bg-slate-900/80 backdrop-blur-sm border border-slate-700 rounded-lg">
+            <TabsTrigger
+              value="all"
+              className="h-10 px-6 data-[state=active]:bg-slate-800 data-[state=active]:text-white data-[state=active]:shadow-sm font-medium text-slate-400 transition-all duration-200 rounded-md"
+            >
+              <Clock className="h-4 w-4 mr-2" />
+              New Listing
+            </TabsTrigger>
+            <TabsTrigger
+              value="trending"
+              className="h-10 px-6 data-[state=active]:bg-slate-800 data-[state=active]:text-white data-[state=active]:shadow-sm font-medium text-slate-400 transition-all duration-200 rounded-md"
+            >
+              <TrendingUp className="h-4 w-4 mr-2" />
+              Trending
+            </TabsTrigger>
+            <TabsTrigger
+              value="graduating"
+              className="h-10 px-6 data-[state=active]:bg-slate-800 data-[state=active]:text-white data-[state=active]:shadow-sm font-medium text-slate-400 transition-all duration-200 rounded-md"
+            >
+              <Rocket className="h-4 w-4 mr-2" />
+              Graduating
+            </TabsTrigger>
+          </TabsList>
+        </div>
 
         <TabsContent value="all" className="mt-0">
           <Card>
@@ -206,7 +240,10 @@ export default function TokensPage() {
                     <tbody className="[&_tr:last-child]:border-0">
                       {tokens.length === 0 ? (
                         <tr>
-                          <td colSpan={7} className="p-8 text-center text-muted-foreground">
+                          <td
+                            colSpan={7}
+                            className="p-8 text-center text-muted-foreground"
+                          >
                             Loading tokens...
                           </td>
                         </tr>
@@ -215,18 +252,25 @@ export default function TokensPage() {
                           <tr
                             key={index}
                             className={`border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted ${
-                              animatedTokens.has(token.tokenMint) ? "animate-shake-row" : ""
+                              animatedTokens.has(token.tokenMint)
+                                ? "animate-shake-row"
+                                : ""
                             }`}
                           >
                             <td className="p-4 align-middle overflow-hidden">
                               <div
                                 className={`flex items-center gap-3 ${
-                                  animatedTokens.has(token.tokenMint) ? "animate-shake-content" : ""
+                                  animatedTokens.has(token.tokenMint)
+                                    ? "animate-shake-content"
+                                    : ""
                                 }`}
                               >
                                 <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden">
                                   <Image
-                                    src={token.tokenImage || "/placeholder.svg?height=40&width=40"}
+                                    src={
+                                      token.tokenImage ||
+                                      "/placeholder.svg?height=40&width=40"
+                                    }
                                     alt={token.tokenName}
                                     width={40}
                                     height={40}
@@ -234,52 +278,88 @@ export default function TokensPage() {
                                   />
                                 </div>
                                 <div>
-                                  <div className="font-medium">{token.tokenName}</div>
-                                  <div className="text-xs text-muted-foreground">{token.tokenSymbol}</div>
+                                  <div className="font-medium">
+                                    {token.tokenName}
+                                  </div>
+                                  <div className="text-xs text-muted-foreground">
+                                    {token.tokenSymbol}
+                                  </div>
                                 </div>
                               </div>
                             </td>
                             <td className="p-4 align-middle overflow-hidden">
                               <div
                                 className={`text-red-500 ${
-                                  animatedTokens.has(token.tokenMint) ? "animate-shake-content" : ""
+                                  animatedTokens.has(token.tokenMint)
+                                    ? "animate-shake-content"
+                                    : ""
                                 }`}
                               >
                                 {(() => {
-                                  const seconds = Math.floor((Date.now() - (token as any).created) / 1000)
+                                  const seconds = Math.floor(
+                                    (Date.now() - (token as any).created) / 1000
+                                  );
                                   if (seconds >= 60) {
-                                    const minutes = Math.floor(seconds / 60)
-                                    return `${minutes}m`
+                                    const minutes = Math.floor(seconds / 60);
+                                    return `${minutes}m`;
                                   }
-                                  return `${seconds}s`
+                                  return `${seconds}s`;
                                 })()}
                               </div>
                             </td>
                             <td className="p-4 align-middle overflow-hidden">
-                              <div className={animatedTokens.has(token.tokenMint) ? "animate-shake-content" : ""}>
+                              <div
+                                className={
+                                  animatedTokens.has(token.tokenMint)
+                                    ? "animate-shake-content"
+                                    : ""
+                                }
+                              >
                                 ${formatMarketCap(token.liquidity)}
                               </div>
                             </td>
                             <td className="p-4 align-middle overflow-hidden">
-                              <div className={animatedTokens.has(token.tokenMint) ? "animate-shake-content" : ""}>
+                              <div
+                                className={
+                                  animatedTokens.has(token.tokenMint)
+                                    ? "animate-shake-content"
+                                    : ""
+                                }
+                              >
                                 <div>${formatMarketCap(token.marketCap)}</div>
-                                <div className="text-xs text-muted-foreground">{formatPrice(token.price)}</div>
+                                <div className="text-xs text-muted-foreground">
+                                  {formatPrice(token.price)}
+                                </div>
                               </div>
                             </td>
                             <td className="p-4 align-middle overflow-hidden">
-                              <div className={animatedTokens.has(token.tokenMint) ? "animate-shake-content" : ""}>
+                              <div
+                                className={
+                                  animatedTokens.has(token.tokenMint)
+                                    ? "animate-shake-content"
+                                    : ""
+                                }
+                              >
                                 {token.holders}
                               </div>
                             </td>
                             <td className="p-4 align-middle overflow-hidden">
-                              <div className={animatedTokens.has(token.tokenMint) ? "animate-shake-content" : ""}>
+                              <div
+                                className={
+                                  animatedTokens.has(token.tokenMint)
+                                    ? "animate-shake-content"
+                                    : ""
+                                }
+                              >
                                 ${formatMarketCap(token.volume)}
                               </div>
                             </td>
                             <td className="p-4 align-middle overflow-hidden">
                               <div
                                 className={`flex space-x-2 ${
-                                  animatedTokens.has(token.tokenMint) ? "animate-shake-content" : ""
+                                  animatedTokens.has(token.tokenMint)
+                                    ? "animate-shake-content"
+                                    : ""
                                 }`}
                               >
                                 <Button
@@ -287,24 +367,33 @@ export default function TokensPage() {
                                   variant="outline"
                                   className="h-8 px-2 text-xs"
                                   onClick={() => {
-                                    console.log("Toast")
+                                    console.log("Toast");
                                     toast.success({
                                       title: "Coming soon!",
-                                      description: "This feature is not available yet. Please check back later.",
-                                    })
+                                      description:
+                                        "This feature is not available yet. Please check back later.",
+                                    });
                                   }}
                                 >
                                   <span className="mr-1">Quick Buy</span>
-                                  <span className="text-green-500">0.5 SOL </span>
+                                  <span className="text-green-500">
+                                    0.5 SOL{" "}
+                                  </span>
                                 </Button>
                                 <a
                                   href={`https://pump.fun/${token.tokenMint}`}
                                   target="_blank"
                                   rel="noopener noreferrer"
                                 >
-                                  <Button size="icon" variant="ghost" className="h-8 w-8">
+                                  <Button
+                                    size="icon"
+                                    variant="ghost"
+                                    className="h-8 w-8"
+                                  >
                                     <ExternalLink className="h-4 w-4" />
-                                    <span className="sr-only">View on Pump.fun</span>
+                                    <span className="sr-only">
+                                      View on Pump.fun
+                                    </span>
                                   </Button>
                                 </a>
                               </div>
@@ -322,10 +411,6 @@ export default function TokensPage() {
 
         <TabsContent value="trending" className="mt-0">
           <Card>
-            <CardHeader>
-              <CardTitle>Trending Tokens</CardTitle>
-              <CardDescription>Tokens with the highest trading volume in the last 24 hours.</CardDescription>
-            </CardHeader>
             <CardContent className="p-0">
               <div className="rounded-md border">
                 <div className="relative w-full overflow-auto">
@@ -370,7 +455,10 @@ export default function TokensPage() {
                     <tbody className="[&_tr:last-child]:border-0">
                       {trendingTokens.length === 0 ? (
                         <tr>
-                          <td colSpan={6} className="p-8 text-center text-muted-foreground">
+                          <td
+                            colSpan={6}
+                            className="p-8 text-center text-muted-foreground"
+                          >
                             Loading trending tokens...
                           </td>
                         </tr>
@@ -384,7 +472,10 @@ export default function TokensPage() {
                               <div className="flex items-center gap-3">
                                 <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden">
                                   <Image
-                                    src={token.logoURI || "/placeholder.svg?height=40&width=40"}
+                                    src={
+                                      token.logoURI ||
+                                      "/placeholder.svg?height=40&width=40"
+                                    }
                                     alt={token.name}
                                     width={40}
                                     height={40}
@@ -392,8 +483,12 @@ export default function TokensPage() {
                                   />
                                 </div>
                                 <div>
-                                  <div className="font-medium">{token.name}</div>
-                                  <div className="text-xs text-muted-foreground">{token.symbol}</div>
+                                  <div className="font-medium">
+                                    {token.name}
+                                  </div>
+                                  <div className="text-xs text-muted-foreground">
+                                    {token.symbol}
+                                  </div>
                                 </div>
                               </div>
                             </td>
@@ -408,11 +503,18 @@ export default function TokensPage() {
                               <div className="text-xs text-muted-foreground">
                                 {token.volume24hChangePercent > 0 ? (
                                   <span className="text-green-500">
-                                    +{Number(token.volume24hChangePercent).toFixed(2)}%
+                                    +
+                                    {Number(
+                                      token.volume24hChangePercent
+                                    ).toFixed(2)}
+                                    %
                                   </span>
                                 ) : (
                                   <span className="text-red-500">
-                                    {Number(token.volume24hChangePercent).toFixed(2)}%
+                                    {Number(
+                                      token.volume24hChangePercent
+                                    ).toFixed(2)}
+                                    %
                                   </span>
                                 )}
                               </div>
@@ -421,9 +523,13 @@ export default function TokensPage() {
                               <div>{formatPrice(token.price)}</div>
                               <div className="text-xs text-muted-foreground">
                                 {token.price24hChangePercent > 0 ? (
-                                  <span className="text-green-500">+{token.price24hChangePercent.toFixed(2)}%</span>
+                                  <span className="text-green-500">
+                                    +{token.price24hChangePercent.toFixed(2)}%
+                                  </span>
                                 ) : (
-                                  <span className="text-red-500">{token.price24hChangePercent.toFixed(2)}%</span>
+                                  <span className="text-red-500">
+                                    {token.price24hChangePercent.toFixed(2)}%
+                                  </span>
                                 )}
                               </div>
                             </td>
@@ -436,8 +542,9 @@ export default function TokensPage() {
                                   onClick={() => {
                                     toast.success({
                                       title: "Coming soon!",
-                                      description: "This feature is not available yet. Please check back later.",
-                                    })
+                                      description:
+                                        "This feature is not available yet. Please check back later.",
+                                    });
                                   }}
                                 >
                                   <span className="mr-1 ">Quick Copy</span>
@@ -447,9 +554,15 @@ export default function TokensPage() {
                                   target="_blank"
                                   rel="noopener noreferrer"
                                 >
-                                  <Button size="icon" variant="ghost" className="h-8 w-8">
+                                  <Button
+                                    size="icon"
+                                    variant="ghost"
+                                    className="h-8 w-8"
+                                  >
                                     <ExternalLink className="h-4 w-4" />
-                                    <span className="sr-only">View on Pump.fun</span>
+                                    <span className="sr-only">
+                                      View on Pump.fun
+                                    </span>
                                   </Button>
                                 </a>
                               </div>
@@ -469,14 +582,18 @@ export default function TokensPage() {
           <Card>
             <CardHeader>
               <CardTitle>Verified Tokens</CardTitle>
-              <CardDescription>Tokens that have been verified by the community.</CardDescription>
+              <CardDescription>
+                Tokens that have been verified by the community.
+              </CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-center py-8 text-muted-foreground">No verified tokens found.</p>
+              <p className="text-center py-8 text-muted-foreground">
+                No verified tokens found.
+              </p>
             </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
     </div>
-  )
+  );
 }
