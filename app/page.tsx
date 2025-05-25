@@ -44,15 +44,15 @@ export default function Home() {
             </div>
             <div className="pt-8 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
               <div>
-                <p className="text-3xl font-bold gradient-text">10K+</p>
+                <p className="text-3xl font-bold gradient-text">1K+</p>
                 <p className="text-sm text-muted-foreground">Tokens Created</p>
               </div>
               <div>
-                <p className="text-3xl font-bold gradient-text">$50M+</p>
+                <p className="text-3xl font-bold gradient-text">$5M+</p>
                 <p className="text-sm text-muted-foreground">Total Value</p>
               </div>
               <div>
-                <p className="text-3xl font-bold gradient-text">5K+</p>
+                <p className="text-3xl font-bold gradient-text">2K+</p>
                 <p className="text-sm text-muted-foreground">Active Users</p>
               </div>
               <div>
@@ -207,16 +207,15 @@ export default function Home() {
           <div className="glass-effect rounded-2xl p-8 md:p-12 relative overflow-hidden glow">
             <div className="relative z-10 text-center max-w-2xl mx-auto">
               <h2 className="text-3xl md:text-4xl font-bold mb-4">
-                Ready to Create Your{" "}
-                <span className="gradient-text">Solana Token</span>?
+                Official{" "}
+                <span className="gradient-text">EZ/SOL</span> Token
               </h2>
               <p className="text-muted-foreground mb-8">
-                Join thousands of creators who have already launched their
-                tokens with EzSol.
+                Contract Address: <span className="gradient-text">coming soon</span>
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button size="lg" className="gradient-border">
-                  Start Creating
+                  Swap Now
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </div>
