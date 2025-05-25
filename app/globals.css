@@ -149,3 +149,31 @@ input[type="number"] {
 .animate-shake-content {
   animation: shake-content 0.5s ease-in-out 1;
 }
+
+.loader {
+  box-sizing: border-box;
+  position: relative;
+  width: 48px;
+  height: 48px;
+  animation: spin 1s linear infinite;
+}
+.loader:after, .loader:before {
+  content: "";
+  width: 12px;
+  height: 12px;
+  position: absolute;
+  border-radius: 50%;
+  background: #430477;
+  animation: spin 1s linear infinite;
+  transform-origin: 0px 100%;
+}
+.loader:before {
+  transform-origin: 0 50%;
+  background: #8d8989;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+    
