@@ -142,12 +142,18 @@ export async function fetchOwnedTokens(
       .from("users")
       .select("id")
       .eq("wallet", walletAddress)
+      .order("createdAt", { ascending: false })
       .single()
+      
 
     if (userError || !user) return []
 
     // Get coins by user id and network
-    const { data: coins, error: coinsError } = await supabase.from("coins").select("*").eq("owner_id", user.id)
+    const { data: coins, error: coinsError } = await supabase
+      .from("coins")
+      .select("*")
+      .eq("owner_id", user.id)
+      .order("createdAt", { ascending: false })
 
     if (coinsError || !coins) return []
 

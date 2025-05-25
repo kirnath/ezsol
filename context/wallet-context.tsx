@@ -31,7 +31,6 @@ interface WalletContextProps {
   walletIcon: string | null
   balance: number | null
   network: NetworkType
-  setNetwork: (network: NetworkType) => void
   connection: Connection | null
   connectWallet: () => void
   disconnectWallet: () => void
@@ -46,7 +45,6 @@ const WalletContext = createContext<WalletContextProps>({
   walletIcon: null,
   balance: null,
   network: "devnet",
-  setNetwork: () => {},
   connection: null,
   connectWallet: () => {},
   disconnectWallet: () => {},
@@ -62,10 +60,10 @@ interface WalletContextProviderProps {
 export function WalletContextProvider({ children }: WalletContextProviderProps) {
   // Get network from env, default to 'devnet' if not set
   const network = (process.env.NEXT_PUBLIC_NETWORK as NetworkType) || "devnet"
- 
+  const DEVNET_RPC = `https://devnet.helius-rpc.com/?api-key=${process.env.NEXT_PUBLIC_HELIUS_API_KEY}`
   const HELIUS_RPC = `https://alma-cecxft-fast-mainnet.helius-rpc.com`
   // Get the endpoint based on the selected network
-  const endpoint = network === "mainnet-beta" ? HELIUS_RPC : clusterApiUrl(network as WalletAdapterNetwork)
+  const endpoint = network === "mainnet-beta" ? HELIUS_RPC : DEVNET_RPC
 
   // Initialize wallet adapters
   const wallets = [
@@ -90,11 +88,9 @@ export function WalletContextProvider({ children }: WalletContextProviderProps) 
 function WalletContextContent({
   children,
   network,
-  setNetwork,
 }: {
   children: ReactNode
   network: NetworkType
-  setNetwork: (network: NetworkType) => void
 }) {
   const { publicKey, connected, connecting, wallet, disconnect, select } = useWalletAdapter()
   const { connection } = useConnection()
@@ -157,7 +153,6 @@ function WalletContextContent({
     walletIcon,
     balance,
     network,
-    setNetwork,
     connection,
     connectWallet,
     disconnectWallet,
