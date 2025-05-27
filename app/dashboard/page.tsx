@@ -244,7 +244,7 @@ export default function DashboardPage() {
           ) : (
             <>
               <TokenTableTooltip />
-              <TokenTable tokens={ownedTokens} />
+              {/* <TokenTable tokens={ownedTokens} /> */}
             </>
           )}
         </TabsContent>

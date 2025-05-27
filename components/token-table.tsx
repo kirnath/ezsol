@@ -12,6 +12,7 @@ interface TokenTableProps {
 }
 
 export default function TokenTable({ tokens }: TokenTableProps) {
+  const isPositive = 1
   if (!tokens || tokens.length === 0) {
     return (
       <Card>
@@ -72,7 +73,7 @@ export default function TokenTable({ tokens }: TokenTableProps) {
                       </div>
                     </div>
                   </td>
-                  <td className="p-4 align-middle">{marketData.price}</td>
+                  <td className="p-4 align-middle">0</td>
                   <td className="p-4 align-middle">
                     <span
                       className={cn("flex items-center font-medium", isPositive ? "text-green-500" : "text-red-500")}
@@ -82,10 +83,10 @@ export default function TokenTable({ tokens }: TokenTableProps) {
                       ) : (
                         <ArrowDownRight className="mr-1 h-3 w-3" />
                       )}
-                      {marketData.change}
+                      0
                     </span>
                   </td>
-                  <td className="p-4 align-middle">{marketData.volume}</td>
+                  <td className="p-4 align-middle">0</td>
                   <td className="p-4 align-middle">
                     {token.balance ? Number.parseFloat(token.balance).toLocaleString() : "0"} {token.symbol}
                   </td>
