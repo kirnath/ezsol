@@ -1,6 +1,7 @@
 import { createClient } from "@supabase/supabase-js"
 import type { Connection } from "@solana/web3.js"
 import type { NetworkType } from "@/context/wallet-context"
+import axios from "axios"
 
 const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!)
 
@@ -168,11 +169,11 @@ export async function fetchOwnedTokens(
 /**
  * Get token price and market data (mock implementation)
  */
-export function getTokenMarketData(mintAddress: string) {
-  // In a real app, you would fetch this from a price API
-  return {
-    price: `$${(Math.random() * 10).toFixed(2)}`,
-    change: `${Math.random() > 0.5 ? "+" : "-"}${(Math.random() * 10).toFixed(2)}%`,
-    volume: `$${(Math.random() * 100000).toFixed(2)}`,
+export async function getTokenMarketData(mintAddress: string) {
+  try{
+    const response = await axios.get(`https://pinata.ezsol.xyz/token-overview/${mintAddress}`)
+    return response.data
+  }catch (error) {
+    console.error("Error fetching token market data:", error)
   }
 }

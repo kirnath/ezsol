@@ -43,9 +43,9 @@ export default function TokenTable({ tokens }: TokenTableProps) {
             </tr>
           </thead>
           <tbody className="[&_tr:last-child]:border-0">
-            {tokens.map((token) => {
-              const marketData = getTokenMarketData(token.mintAddress)
-              const isPositive = marketData.change.startsWith("+")
+            {tokens.map(async (token) => {
+              const marketData = await getTokenMarketData(token.mintAddress)
+              const isPositive = marketData.priceChange24hPercent.startsWith("+")
 
               return (
                 <tr

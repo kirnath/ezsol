@@ -17,7 +17,27 @@ import { PortfolioOverview } from "@/components/dashboard/portfolio-overview"
 import { useToastNotification } from "@/components/toast-notification"
 import { fetchCreatedTokens, fetchOwnedTokens, type TokenData } from "@/lib/token-service"
 import { Skeleton } from "@/components/ui/skeleton"
+import fetchPortfolioData from "@/lib/portfolio-utils"
 
+
+interface PortfolioData {
+  wallet: string
+  totalUSD: number
+  items: [
+    {
+      address: string
+      decimals: number
+      balance: number
+      uiAmount: number
+      chainId: string
+      name: string
+      symbol: string
+      logoURI: string
+      priceUsd: number
+      valueUsd: number
+    }
+  ]
+}
 export default function DashboardPage() {
   const { connected, publicKey, connection, network } = useWalletContext()
   const { setVisible } = useWalletModal()
@@ -27,16 +47,15 @@ export default function DashboardPage() {
   const [dashboardStats, setDashboardStats] = useState({
     totalValue: 0,
     totalHolders: 0,
-    volume24h: 0,
     totalTokens: 0,
     solBalance: 0,
     isLoading: true,
   })
 
   // State for tokens
-  const [recentTokens, setRecentTokens] = useState<TokenData[]>([])
-  const [ownedTokens, setOwnedTokens] = useState<TokenData[]>([])
+  const [ownedTokens, setOwnedTokens] = useState<PortfolioData["items"]>()
   const [isLoadingTokens, setIsLoadingTokens] = useState(true)
+  const [portfolio, setPortfolio] = useState<PortfolioData | null>(null)
 
   // Fetch dashboard stats and tokens
   useEffect(() => {
@@ -44,24 +63,21 @@ export default function DashboardPage() {
       const fetchData = async () => {
         setIsLoadingTokens(true)
         try {
-          const createdTokens = await fetchCreatedTokens(connection, publicKey, network)
-          setRecentTokens(createdTokens.slice(0, 2))
-          const tokens = await fetchOwnedTokens(connection, publicKey, network)
-          setOwnedTokens(tokens)
+          const walletPortfolio = await fetchPortfolioData(publicKey as string)
+          setPortfolio(walletPortfolio)
 
           // Get SOL balance
           const balance = await connection.getBalance(new PublicKey(publicKey))
-          console.log(balance)
           const solBalance = Number(balance) / 1e9 // Convert lamports to SOL
 
           setDashboardStats({
-            totalValue: tokens.reduce((sum, token) => sum + Number.parseFloat(token.balance || "0") * 1.5, 0),
-            totalHolders: createdTokens.length > 0 ? Math.floor(Math.random() * 1000) + 100 : 0,
-            volume24h: tokens.length > 0 ? Math.floor(Math.random() * 10000) + 1000 : 0,
-            totalTokens: createdTokens.length,
+            totalValue: portfolio?.totalUSD || 0,
+            totalHolders: 0,
+            totalTokens: portfolio?.items.length || 0,
             solBalance,
             isLoading: false,
           })
+          setOwnedTokens(walletPortfolio.items)
         } catch (error) {
           console.error("Error fetching token data:", error)
           toast.error({
@@ -154,28 +170,7 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">24h Volume</CardTitle>
-            <Activity className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            {dashboardStats.isLoading ? (
-              <Skeleton className="h-8 w-24" />
-            ) : (
-              <>
-                <div className="text-2xl font-bold">${dashboardStats.volume24h.toLocaleString()}</div>
-                <p className="text-xs text-muted-foreground">
-                  <span className="text-red-500 inline-flex items-center">
-                    <ArrowDownRight className="mr-1 h-3 w-3" />
-                    -2.5%
-                  </span>{" "}
-                  from yesterday
-                </p>
-              </>
-            )}
-          </CardContent>
-        </Card>
+        
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
