@@ -211,7 +211,7 @@ export default function Home() {
                 <span className="gradient-text">EZ/SOL</span> Token
               </h2>
               <p className="text-muted-foreground mb-8">
-                Contract Address: <span className="gradient-text">coming soon</span>
+                Contract Address: <span className="gradient-text">69HzZraQMbsU4JNqgthCeJbZotRBHyxi7xKFnAL2pump</span>
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button size="lg" className="gradient-border">

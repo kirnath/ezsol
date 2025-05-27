@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { Github, Twitter, DiscIcon as Discord } from "lucide-react"
+import { Github, Twitter, DiscIcon as Discord, Send as Telegram } from "lucide-react"
 
 const Footer = () => {
   return (
@@ -20,9 +20,9 @@ const Footer = () => {
                 <Github size={20} />
                 <span className="sr-only">GitHub</span>
               </Link>
-              <Link href="https://discord.com" className="text-muted-foreground hover:text-primary">
-                <Discord size={20} />
-                <span className="sr-only">Discord</span>
+              <Link href="https://t.me/ezsol_xyz" className="text-muted-foreground hover:text-primary">
+                <Telegram size={20} />
+                <span className="sr-only">Telegram</span>
               </Link>
             </div>
           </div>
