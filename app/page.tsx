@@ -214,10 +214,12 @@ export default function Home() {
                 Contract Address: <span className="gradient-text">69HzZraQMbsU4JNqgthCeJbZotRBHyxi7xKFnAL2pump</span>
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="https://pump.fun/coin/69HzZraQMbsU4JNqgthCeJbZotRBHyxi7xKFnAL2pump" target="_blank" rel="noopener noreferrer">
                 <Button size="lg" className="gradient-border">
                   Swap Now
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
+                </a>
               </div>
             </div>
           </div>
