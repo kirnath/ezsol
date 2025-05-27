@@ -22,7 +22,7 @@ import fetchPortfolioData from "@/lib/portfolio-utils"
 
 interface PortfolioData {
   wallet: string
-  totalUSD: number
+  totalUsd: number
   items: [
     {
       address: string
@@ -50,6 +50,7 @@ export default function DashboardPage() {
     totalTokens: 0,
     solBalance: 0,
     isLoading: true,
+    totalUSD: 0,
   })
 
   // State for tokens
@@ -71,11 +72,12 @@ export default function DashboardPage() {
           const solBalance = Number(balance) / 1e9 // Convert lamports to SOL
 
           setDashboardStats({
-            totalValue: portfolio?.totalUSD || 0,
+            totalValue: portfolio?.totalUsd || 0,
             totalHolders: 0,
             totalTokens: portfolio?.items.length || 0,
             solBalance,
             isLoading: false,
+            totalUSD: portfolio?.totalUsd || 0,
           })
           setOwnedTokens(walletPortfolio.items)
         } catch (error) {
@@ -209,6 +211,24 @@ export default function DashboardPage() {
             ) : (
               <>
                 <div className="text-2xl font-bold">{dashboardStats.solBalance.toFixed(4)} SOL</div>
+                <p className="text-xs text-muted-foreground">
+                  <span className="text-muted-foreground">Wallet balance</span>
+                </p>
+              </>
+            )}
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">USD Balance</CardTitle>
+            <Coins className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            {dashboardStats.isLoading ? (
+              <Skeleton className="h-8 w-24" />
+            ) : (
+              <>
+                <div className="text-2xl font-bold">{portfolio?.totalUsd.toFixed(4)} USD</div>
                 <p className="text-xs text-muted-foreground">
                   <span className="text-muted-foreground">Wallet balance</span>
                 </p>

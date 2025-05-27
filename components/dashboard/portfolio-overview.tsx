@@ -50,10 +50,10 @@ export function PortfolioOverview({ totalTokens, solBalance }: PortfolioOverview
               <div className="text-sm text-muted-foreground">SOL Balance</div>
               <div className="text-xl font-bold">{solBalance.toFixed(4)} SOL</div>
             </div>
-            <div className="space-y-1">
+            {/* <div className="space-y-1">
               <div className="text-sm text-muted-foreground">USD Value</div>
               <div className="text-xl font-bold">${portfolioValueUSD.toFixed(2)}</div>
-            </div>
+            </div> */}
           </div>
 
           <div className="flex items-center justify-between pt-2">
