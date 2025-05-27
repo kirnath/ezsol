@@ -63,7 +63,7 @@ export default function DashboardPage() {
       const fetchData = async () => {
         setIsLoadingTokens(true)
         try {
-          const walletPortfolio = await fetchPortfolioData(publicKey as string)
+          const walletPortfolio = await fetchPortfolioData(publicKey.toString())
           setPortfolio(walletPortfolio)
 
           // Get SOL balance
