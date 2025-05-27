@@ -12,7 +12,7 @@ async function fetchTokenOverview(mintAddress: string): Promise<any> {
 
   try {
     const response = await axios.get(
-      "https://public-api.birdeye.so/defi/token_overview?address=" + mintAddress,
+      "https://pinata.ezsol.xyz/token-overview/" + mintAddress,
       options
     );
     return response.data.data;
