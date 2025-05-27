@@ -42,7 +42,7 @@ export async function attachMetadata(
     METADATA_PROGRAM_ID
   );
   
-  // Prepare the metadata instruction
+  
   const createMetadataInstruction = createCreateMetadataAccountV3Instruction(
     {
       metadata: metadataAccount,
@@ -68,10 +68,9 @@ export async function attachMetadata(
     }
   );
   
-  // Create transaction and add the instruction
   const transaction = new Transaction().add(createMetadataInstruction);
   
-  // Get recent blockhash
+
   const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
   transaction.recentBlockhash = blockhash;
   transaction.feePayer = payer;
