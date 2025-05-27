@@ -91,7 +91,7 @@ export default function DashboardPage() {
 
       fetchData()
     }
-  }, [connected, publicKey, connection, network])
+  }, [connected])
 
   // If not connected, show wallet connection prompt
   if (!connected) {

@@ -170,6 +170,7 @@ export async function fetchOwnedTokens(
  * Get token price and market data (mock implementation)
  */
 export async function getTokenMarketData(mintAddress: string) {
+  if(!mintAddress) return
   try{
     const response = await axios.get(`https://pinata.ezsol.xyz/token-overview/${mintAddress}`)
     return response.data
