@@ -61,6 +61,7 @@ export function WalletContextProvider({ children }: WalletContextProviderProps) 
   // Get network from env, default to 'devnet' if not set
   const network = (process.env.NEXT_PUBLIC_NETWORK as NetworkType) || "devnet"
   const DEVNET_RPC = `https://courtney-pgsun1-fast-devnet.helius-rpc.com`
+  // const DEVNET_RPC = `https://api.devnet.solana.com`
   const HELIUS_RPC = `https://alma-cecxft-fast-mainnet.helius-rpc.com`
   // Get the endpoint based on the selected network
   const endpoint = network === "mainnet-beta" ? HELIUS_RPC : DEVNET_RPC

@@ -64,10 +64,10 @@ export function BuyPumpsDialog({
 
   const handlePurchase = async () => {
     //dev mode
-    return toast.success({
-      title: "Coming Soon!",
-      description: `This feature is coming soon.`,
-    })
+    // return toast.success({
+    //   title: "Coming Soon!",
+    //   description: `This feature is coming soon.`,
+    // })
     if (!connected) {
       toast.error({
         title: "Wallet not connected",

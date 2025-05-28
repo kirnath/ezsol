@@ -11,6 +11,7 @@ import { useToastNotification } from "@/components/toast-notification"
 import { supabase } from "@/lib/supabase-client"
 import { SubmitTokenDialog } from "./submit-token-dialog"
 import { BuyPumpsDialog } from "./buy-pumps-dialog"
+import fetchTokenOverview from "@/lib/fetch-token-data"
 
 interface PumpedToken {
   id: string
@@ -142,28 +143,47 @@ export default function MostPumpedTab({ searchTerm }: MostPumpedTabProps) {
         return
       }
 
-      // Transform data and add mock price/market data
-      const transformedTokens: PumpedToken[] =
-        tokensData?.map((token: any, index: number) => ({
-          id: token.id,
-          name: token.name,
-          symbol: token.symbol,
-          image_url: token.image_url,
-          mint_address: token.mint_address,
-          total_pumps: token.token_pump_stats?.total_pumps || 0,
-          pumps_1h: token.token_pump_stats?.pumps_1h || 0,
-          pumps_24h: token.token_pump_stats?.pumps_24h || 0,
-          pumps_7d: token.token_pump_stats?.pumps_7d || 0,
-          pump_velocity: token.token_pump_stats?.pump_velocity || "",
-          weighted_score: token.token_pump_stats?.weighted_score || 0,
-          rank_position: token.token_pump_stats?.rank_position || index + 1,
-          last_pump_at: token.token_pump_stats?.last_pump_at || "",
-          // Mock data for price/market info - replace with real data
-          price: (Math.random() * 0.01).toFixed(5),
-          marketCap: `${(Math.random() * 10).toFixed(1)}M`,
-          volume24h: `${(Math.random() * 1000).toFixed(0)}K`,
-          change24h: (Math.random() - 0.5) * 50,
-        })) || []
+      // Transform data and fetch real price/market data
+      const transformedTokens: PumpedToken[] = await Promise.all(
+        tokensData?.map(async (token: any, index: number) => {
+          let price = "0"
+          let marketCap = "0"
+          let volume24h = "0"
+          let change24h = 0
+
+          try {
+            const marketData = await fetchTokenOverview(token.mint_address)
+            if (marketData) {
+              price = marketData.price?.toFixed(6) || "0"
+              marketCap = marketData.marketCap ? `${(marketData.marketCap / 1000000).toFixed(1)}M` : "0"
+              volume24h = marketData.v24hUSD ? `${(marketData.v24hUSD / 1000).toFixed(0)}K` : "0"
+              change24h = marketData.priceChange24hPercent || 0
+            }
+          } catch (error) {
+            console.error(`Error fetching market data for ${token.symbol}:`, error)
+          }
+
+          return {
+            id: token.id,
+            name: token.name,
+            symbol: token.symbol,
+            image_url: token.image_url,
+            mint_address: token.mint_address,
+            total_pumps: token.token_pump_stats?.total_pumps || 0,
+            pumps_1h: token.token_pump_stats?.pumps_1h || 0,
+            pumps_24h: token.token_pump_stats?.pumps_24h || 0,
+            pumps_7d: token.token_pump_stats?.pumps_7d || 0,
+            pump_velocity: token.token_pump_stats?.pump_velocity || "",
+            weighted_score: token.token_pump_stats?.weighted_score || 0,
+            rank_position: token.token_pump_stats?.rank_position || index + 1,
+            last_pump_at: token.token_pump_stats?.last_pump_at || "",
+            price,
+            marketCap,
+            volume24h,
+            change24h,
+          }
+        }) || []
+      )
 
       setPumpedTokens(transformedTokens)
 

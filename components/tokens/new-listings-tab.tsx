@@ -62,6 +62,9 @@ export default function NewListingsTab({ searchTerm }: NewListingsTabProps) {
     function handleNewToken(token: TokenListingProps) {
       const processToken = async () => {
         if (!token.tokenMint) return
+        if (token.tokenMint == "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB") return;
+
+        
         const tokenData = await fetchTokenOverview(token.tokenMint)
         const withTokenData = {
           ...token,

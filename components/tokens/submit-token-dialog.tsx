@@ -34,10 +34,10 @@ export function SubmitTokenDialog({ onTokenSubmitted }: SubmitTokenDialogProps) 
 
   const handleFetchToken = async () => {
     //dev mode
-    return toast.success({
-      title: "Coming Soon!",
-      description: `This feature is coming soon.`,
-    })
+    // return toast.success({
+    //   title: "Coming Soon!",
+    //   description: `This feature is coming soon.`,
+    // })
 
     if (!tokenAddress.trim()) {
       toast.error({
@@ -78,7 +78,13 @@ export function SubmitTokenDialog({ onTokenSubmitted }: SubmitTokenDialogProps) 
       setIsLoading(false)
     }
   }
-
+  const formatMarketCap = (value: string | number) => {
+    const num = Number(value)
+    if (num >= 1e9) return (num / 1e9).toFixed(2) + "B"
+    if (num >= 1e6) return (num / 1e6).toFixed(2) + "M"
+    if (num >= 1e3) return (num / 1e3).toFixed(2) + "K"
+    return num.toFixed(2)
+  }
   const handleSubmitToken = async () => {
     if (!tokenData) return
 
@@ -238,10 +244,14 @@ export function SubmitTokenDialog({ onTokenSubmitted }: SubmitTokenDialogProps) 
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4 text-sm">
+            <div className="grid grid-cols-1 gap-4 text-sm">
               <div>
                 <span className="text-muted-foreground">Decimals:</span>
                 <span className="ml-2">{tokenData.decimals || 9}</span>
+              </div>
+              <div>
+                <span className="text-muted-foreground">Market Cap:</span>
+                <span className="ml-2">${formatMarketCap(Number(tokenData.marketCap || 0)).toLocaleString()}</span>
               </div>
               {tokenData.supply && (
                 <div>
